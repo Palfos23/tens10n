@@ -1,0 +1,192 @@
+{
+  "questions": [
+    {
+      "questionId": "Q0001",
+      "title": "Siste byer til å hoste CL-finalen i fotball for menn",
+      "numTensionAnswers": 3,
+      "answers": {
+        "1": "London",
+        "2": "Paris",
+        "3": "Lisboa",
+        "4": "Munchen",
+        "5": "Kiev",
+        "6": "Madrid",
+        "7": "Milano",
+        "8": "Istanbul",
+        "9": "Porto",
+        "10": "Berlin"
+      },
+      "tensionAnswers": {
+        "11": "Roma",
+        "12": "Moskva",
+        "13": "Athen",
+        "14": "",
+        "15": ""
+      },
+      "answersCategory": "cities"
+    },
+    {
+      "questionId": "Q0002",
+      "title": "Største byer som starter med bokstaven \"B\"",
+      "numTensionAnswers": 3,
+      "answers": {
+        "1": "Beijing",
+        "2": "Bangalore",
+        "3": "Bangkok",
+        "4": "Bogota",
+        "5": "Baghdad",
+        "6": "Berlin",
+        "7": "Busan",
+        "8": "Buenos Aires",
+        "9": "Brasilia",
+        "10": "Bekasi"
+      },
+      "tensionAnswers": {
+        "11": "Bandung",
+        "12": "Belo Horizonte",
+        "13": "Baku",
+        "14": "",
+        "15": ""
+      },
+      "answersCategory": "cities"
+    },
+    {
+      "questionId": "Q0003",
+      "title": "Byer i USA etter innbyggertall",
+      "numTensionAnswers": 3,
+      "answers": {
+        "1": "New York City",
+        "2": "Los Angeles",
+        "3": "Chicago",
+        "4": "Houston",
+        "5": "Phoenix",
+        "6": "Philadelphia",
+        "7": "San Antonio",
+        "8": "San Diego",
+        "9": "Dallas",
+        "10": "Jacksonville"
+      },
+      "tensionAnswers": {
+        "11": "Fort Worth",
+        "12": "Austin",
+        "13": "San Jose",
+        "14": "",
+        "15": ""
+      },
+      "answersCategory": "cities"
+    },
+    {
+      "questionId": "Q0004",
+      "title": "Hovedstader i Europa som ligger høyest over havet",
+      "numTensionAnswers": 3,
+      "answers": {
+        "1": "Andorra La Vella",
+        "2": "Ankara",
+        "3": "Madrid",
+        "4": "Pristina",
+        "5": "Sofia",
+        "6": "Sarajevo",
+        "7": "Bern",
+        "8": "Vaduz",
+        "9": "San Marino",
+        "10": "Ljubljana"
+      },
+      "tensionAnswers": {
+        "11": "Luxembourg",
+        "12": "Praha",
+        "13": "Skopje",
+        "14": "",
+        "15": ""
+      },
+      "answersCategory": "cities"
+    },
+    {
+      "questionId": "Q0005",
+      "title": "Land med hovedstad høyest over havet",
+      "numTensionAnswers": 3,
+      "answers": {
+        "1": "Bolivia",
+        "2": "Ecuador",
+        "3": "Colombia",
+        "4": "Ethiopia",
+        "5": "Bhutan",
+        "6": "Eritrea",
+        "7": "Yemen",
+        "8": "Mexico",
+        "9": "Iran",
+        "10": "Kenya"
+      },
+      "tensionAnswers": {
+        "11": "Afghanistan",
+        "12": "Namibia",
+        "13": "Lesotho",
+        "14": "",
+        "15": ""
+      },
+      "answersCategory": "countries"
+    },
+    {
+      "questionId": "Q0006",
+      "title": "Land med flest løver",
+      "numTensionAnswers": 2,
+      "answers": {
+        "1": "Tanzania",
+        "2": "Sør-Afrika",
+        "3": "Botswana",
+        "4": "Kenya",
+        "5": "Zambia",
+        "6": "Zimbabwe",
+        "7": "Mozambique",
+        "8": "Namibia",
+        "9": "Angola",
+        "10": "Uganda"
+      },
+      "tensionAnswers": {
+        "11": "Ethiopia",
+        "12": "India",
+        "13": "",
+        "14": "",
+        "15": ""
+      },
+      "answersCategory": "countries"
+    }
+  ],
+  "answersCategories": [
+    {
+      "cities": [
+        "London",
+        "Paris",
+        "Lisboa",
+        "Munchen",
+        "Kiev",
+        "Madrid",
+        "Milano",
+        "Istanbul",
+        "Porto",
+        "Berlin",
+        "Roma",
+        "Moskva",
+        "Athen",
+        "Barcelona",
+        "Amsterdam"
+      ],
+      "countries": [
+        "Frankrike",
+        "Storbritannia",
+        "Portugal",
+        "Tyskland",
+        "Ukraina",
+        "Spania",
+        "Italia",
+        "Tyrkia",
+        "Norge",
+        "Sverige",
+        "Finland",
+        "Russland",
+        "Hellas",
+        "Belgia",
+        "Nederland"
+      ]
+    }
+  ]
+}
