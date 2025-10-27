@@ -45,16 +45,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
             </h1>
 
             <button className="create-btn" onClick={() => setOpen(true)}>
-                Create Game
+                Opprett Spill
             </button>
 
             {open && (
                 <div className="modal-overlay" onClick={() => setOpen(false)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
-                        <h2>Create Game</h2>
+                        <h2>Opprett Spill</h2>
 
                         <div className="form-group">
-                            <label>Number of Players</label>
+                            <label>Antall Spillere</label>
                             <select
                                 value={numPlayers}
                                 onChange={(e) => setNumPlayers(e.target.value)}
@@ -68,7 +68,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                         </div>
 
                         <div className="form-group">
-                            <label>Number of Questions</label>
+                            <label>Antall Spørsmål</label>
                             <select
                                 value={numQuestions}
                                 onChange={(e) => setNumQuestions(e.target.value)}
@@ -87,7 +87,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                                 onStartGame(parseInt(numPlayers, 10), parseInt(numQuestions, 10))
                             }
                         >
-                            Start Game
+                            Start Spill
                         </button>
                     </div>
                 </div>

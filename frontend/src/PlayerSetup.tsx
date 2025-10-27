@@ -50,7 +50,7 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
                         letterSpacing: "1px",
                     }}
                 >
-                    Enter Player Names
+                    Skriv inn navn på spillere
                 </h2>
 
                 <div
@@ -66,7 +66,7 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
                         <input
                             key={i}
                             type="text"
-                            placeholder={`Player ${i + 1}`}
+                            placeholder={`Spiller ${i + 1}`}
                             value={name}
                             onChange={(e) => handleChange(i, e.target.value)}
                             style={{
@@ -114,7 +114,7 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
                         allNamed && (e.currentTarget.style.transform = "scale(1)")
                     }
                 >
-                    Start Game
+                    Start Spill
                 </button>
             </div>
         </div>

@@ -461,8 +461,8 @@ export default function GameCenter({
                         }}
                     >
                         {currentQuestionIndex + 1 < questions.length
-                            ? "Next Question"
-                            : "Finish Game"}
+                            ? "Neste Spørsmål"
+                            : "Fullfør Spill"}
                     </button>
                 )}
             </footer>
