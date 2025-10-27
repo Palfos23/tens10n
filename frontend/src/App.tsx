@@ -8,36 +8,31 @@ import GameOver from "./GameOver";
 
 export default function App() {
     const [questions, setQuestions] = useState<QuestionView[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [numPlayers, setNumPlayers] = useState(2);
-    const [numQuestions, setNumQuestions] = useState(5);
     const [stage, setStage] = useState<"landing" | "setup" | "game" | "done">("landing");
     const [playerNames, setPlayerNames] = useState<string[]>([]);
-    const [finalScores, setFinalScores] = useState<Record<string, number>>({}); // ✅ new
+    const [finalScores, setFinalScores] = useState<Record<string, number>>({});
 
-    const handleCreateGame = async (p: number, q: number) => {
+    // ✅ Create new game and fetch random questions (always 5 for now)
+    const handleCreateGame = async (p: number) => {
         setNumPlayers(p);
-        setNumQuestions(q);
         setStage("setup");
-        setLoading(true);
         try {
-            const data = await fetchRandomQuestions(q);
+            const data = await fetchRandomQuestions(5); // fixed question count
             setQuestions(data);
         } catch (e: any) {
-            setError(e?.message ?? "Unknown error");
-        } finally {
-            setLoading(false);
+            alert(e?.message ?? "Failed to load questions.");
+            setQuestions([]);
         }
     };
 
-    // ✅ Called when GameCenter finishes
+    // ✅ When the game ends, store scores
     const handleGameOver = (scores: Record<string, number>) => {
         setFinalScores(scores);
         setStage("done");
     };
 
-    // ✅ Reset game to start over
+    // ✅ Reset to the start
     const resetGame = () => {
         setQuestions([]);
         setPlayerNames([]);
@@ -45,6 +40,7 @@ export default function App() {
         setStage("landing");
     };
 
+    // ---- Stage rendering ----
     if (stage === "landing") {
         return <LandingPage onStartGame={handleCreateGame} />;
     }
@@ -66,7 +62,7 @@ export default function App() {
             <GameCenter
                 questions={questions}
                 playerNames={playerNames}
-                onGameOver={handleGameOver} // ✅ pass scores up
+                onGameOver={handleGameOver}
             />
         );
     }

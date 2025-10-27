@@ -13,6 +13,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
     const winner = sortedScores[0]?.[0] ?? null;
 
     // 🎊 Trigger confetti once when the winner appears
+    // @ts-ignore
     useEffect(() => {
         if (!winner) return;
 
