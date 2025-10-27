@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import type { QuestionView } from "./types";
 import { fetchPossibleAnswers } from "./api"; // fetches from /api/answers
 
-// ✅ Updated: onGameOver now expects scores
 interface GameCenterProps {
     questions: QuestionView[];
     playerNames: string[];
@@ -34,7 +33,6 @@ export default function GameCenter({
 
     const question = questions[currentQuestionIndex];
 
-    // combine all answers (top + tension)
     const allAnswersList = [
         ...question.answers.map((a) => ({ text: a.text, index: a.index, tension: false })),
         ...question.tensionAnswers.map((a) => ({ text: a.text, index: a.index, tension: true })),
@@ -77,7 +75,6 @@ export default function GameCenter({
         setRevealIndex(0);
     };
 
-    // reveal gradually
     useEffect(() => {
         if (!revealed) return;
         if (revealIndex < allAnswersList.length) {
@@ -103,7 +100,6 @@ export default function GameCenter({
         }
     }, [revealed, revealIndex, allAnswersList, answers, pendingScores, scores]);
 
-    // ✅ FIXED: now passes scores to App
     const handleNextQuestion = () => {
         if (currentQuestionIndex + 1 < questions.length) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -112,22 +108,29 @@ export default function GameCenter({
             setCurrentPlayer(0);
             setRevealIndex(0);
         } else {
-            onGameOver(scores); // ✅ send final scores up
+            onGameOver(scores);
         }
     };
 
     const allAnswered = answers.length === playerNames.length;
 
+    // helper: split players into left/right evenly
+    const splitPlayers = (players: string[]): [string[], string[]] => {
+        const half = Math.ceil(players.length / 2);
+        return [players.slice(0, half), players.slice(half)];
+    };
+
     return (
         <div
             style={{
-                height: "100vh",
+                minHeight: "100vh",
                 width: "100vw",
-                display: "grid",
-                gridTemplateRows: "20% 60% 20%",
+                display: "flex",
+                flexDirection: "column",
                 background: "linear-gradient(180deg, #0f2027, #203a43, #2c5364)",
                 color: "white",
-                overflow: "hidden",
+                overflowY: "auto",         // ← allow vertical scrolling
+                overflowX: "hidden",
             }}
         >
             {/* === TOP === */}
@@ -138,6 +141,7 @@ export default function GameCenter({
                     justifyContent: "center",
                     alignItems: "center",
                     textAlign: "center",
+                    paddingTop: "1.5rem",
                 }}
             >
                 <h2 style={{ fontSize: "1.4rem", opacity: 0.8, marginBottom: "0.5rem" }}>
@@ -166,219 +170,234 @@ export default function GameCenter({
                 </p>
             </header>
 
-            {/* === MIDDLE === */}
+            {/* === MAIN AREA === */}
             <main
                 style={{
-                    display: "grid",
-                    gridTemplateColumns: "35% 10% 55%",
-                    alignItems: "center",
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "flex-start",
+                    gap: "3rem",
                     width: "100%",
+                    marginTop: "2rem",
                 }}
             >
-                {/* LEFT PANEL */}
-                <div
-                    style={{
-                        paddingLeft: "8%",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.8rem",
-                    }}
-                >
-                    <h3 style={{ textAlign: "left", opacity: 0.8 }}>Players</h3>
-                    {playerNames.map((player) => {
-                        const pa = answers.find((a) => a.player === player);
-                        const roundScore = pa?.score ?? 0;
-                        const answerInList = pa?.index !== undefined;
-                        const theirAnswerRevealed =
-                            revealed &&
-                            answerInList &&
-                            allAnswersList
-                                .slice(0, revealIndex)
-                                .some(
-                                    (ans) =>
-                                        ans.text.toLowerCase() === (pa?.answer ?? "").toLowerCase()
-                                );
-                        const allRevealed = revealIndex >= allAnswersList.length;
-                        const showRoundScore =
-                            revealed &&
-                            pa !== undefined &&
-                            (theirAnswerRevealed || (!answerInList && allRevealed));
+                {(() => {
+                    const [leftPlayers, rightPlayers] = splitPlayers(playerNames);
 
-                        return (
-                            <div
-                                key={player}
-                                style={{
-                                    background: "rgba(255,255,255,0.1)",
-                                    borderRadius: 10,
-                                    padding: "0.6rem 1rem",
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    minWidth: "250px",
-                                }}
-                            >
-                                <div style={{ textAlign: "left" }}>
-                                    <strong>{player}</strong>
-                                    <div
-                                        style={{
-                                            fontSize: "0.9rem",
-                                            opacity: 0.8,
-                                            fontStyle: pa ? "normal" : "italic",
-                                        }}
-                                    >
-                                        {pa ? pa.answer : "— awaiting answer —"}
-                                    </div>
-                                </div>
-                                <div style={{ textAlign: "right" }}>
-                                    {showRoundScore && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ duration: 0.4 }}
-                                            style={{
-                                                fontSize: "1rem",
-                                                color:
-                                                    roundScore > 0
-                                                        ? "#7CFC00"
-                                                        : roundScore < 0
-                                                            ? "#ff6961"
-                                                            : "white",
-                                            }}
-                                        >
-                                            {roundScore > 0 ? `+${roundScore}` : roundScore}
-                                        </motion.div>
-                                    )}
-                                    <div
-                                        style={{
-                                            fontSize: "0.9rem",
-                                            opacity: 0.7,
-                                            marginTop: "0.2rem",
-                                        }}
-                                    >
-                                        Total: {scores[player]}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* SPACER */}
-                <div></div>
-
-                {/* RIGHT TABLE */}
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "flex-start",
-                        paddingLeft: "4rem",
-                        paddingRight: "2rem",
-                    }}
-                >
-                    <div
-                        style={{
-                            background: "rgba(255,255,255,0.1)",
-                            backdropFilter: "blur(10px)",
-                            borderRadius: 16,
-                            padding: "1.5rem 1.2rem",
-                            width: "430px",
-                            minHeight: "450px",
-                            boxShadow: "0 0 20px rgba(0,0,0,0.4)",
-                            border: "1px solid rgba(255,255,255,0.15)",
-                        }}
-                    >
-                        <h3
+                    const renderPlayerList = (sidePlayers: string[]) => (
+                        <div
                             style={{
-                                textAlign: "center",
-                                fontWeight: 500,
-                                letterSpacing: "1px",
-                                marginBottom: "1rem",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "0.8rem",
+                                minWidth: "220px",
+                                alignItems: "stretch",
                             }}
                         >
-                            Answers
-                        </h3>
-                        <table
-                            style={{
-                                width: "100%",
-                                borderCollapse: "collapse",
-                                textAlign: "left",
-                            }}
-                        >
-                            <thead>
-                            <tr style={{ opacity: 0.7, fontSize: "1rem" }}>
-                                <th>#</th>
-                                <th>Answer</th>
-                                <th>Player</th>
-                                <th>Score</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {allAnswersList.map((ans, idx) => {
-                                const revealedNow = revealIndex > idx;
-                                const guessedBy = revealedNow
-                                    ? answers.filter(
-                                        (a) => a.answer.toLowerCase() === ans.text.toLowerCase()
-                                    )
-                                    : [];
+                            {sidePlayers.map((player) => {
+                                const pa = answers.find((a) => a.player === player);
+                                const roundScore = pa?.score ?? 0;
+                                const answerInList = pa?.index !== undefined;
+                                const theirAnswerRevealed =
+                                    revealed &&
+                                    answerInList &&
+                                    allAnswersList
+                                        .slice(0, revealIndex)
+                                        .some(
+                                            (ans) =>
+                                                ans.text.toLowerCase() ===
+                                                (pa?.answer ?? "").toLowerCase()
+                                        );
+                                const allRevealed = revealIndex >= allAnswersList.length;
+                                const showRoundScore =
+                                    revealed &&
+                                    pa !== undefined &&
+                                    (theirAnswerRevealed ||
+                                        (!answerInList && allRevealed));
+
                                 return (
-                                    <motion.tr
-                                        key={ans.text}
-                                        initial={{ opacity: 0 }}
-                                        animate={{
-                                            opacity: 1,
-                                            backgroundColor: revealedNow
-                                                ? ans.tension
-                                                    ? [
-                                                        "rgba(255,80,80,0.3)",
-                                                        "rgba(255,80,80,0.1)",
-                                                    ]
-                                                    : [
-                                                        "rgba(0,255,0,0.3)",
-                                                        "rgba(0,255,0,0.05)",
-                                                    ]
-                                                : "transparent",
-                                        }}
-                                        transition={{
-                                            duration: revealedNow ? 1.2 : 0.5,
-                                            ease: "easeInOut",
+                                    <div
+                                        key={player}
+                                        style={{
+                                            background: "rgba(255,255,255,0.1)",
+                                            borderRadius: 10,
+                                            padding: "0.6rem 1rem",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            minWidth: "220px",
+                                            boxShadow: "0 0 6px rgba(0,0,0,0.3)",
                                         }}
                                     >
-                                        <td>{ans.index}</td>
-                                        <td>{revealedNow ? ans.text : "— hidden —"}</td>
-                                        <td>
-                                            {revealedNow && guessedBy.length > 0
-                                                ? guessedBy.map((g) => g.player).join(", ")
-                                                : ""}
-                                        </td>
-                                        <td>
-                                            {revealedNow && guessedBy.length > 0
-                                                ? guessedBy
-                                                    .map((g) =>
-                                                        g.score! > 0 ? `+${g.score}` : g.score
-                                                    )
-                                                    .join(", ")
-                                                : ""}
-                                        </td>
-                                    </motion.tr>
+                                        <div style={{ textAlign: "left" }}>
+                                            <strong>{player}</strong>
+                                            <div
+                                                style={{
+                                                    fontSize: "0.9rem",
+                                                    opacity: 0.8,
+                                                    fontStyle: pa ? "normal" : "italic",
+                                                }}
+                                            >
+                                                {pa ? pa.answer : "— awaiting answer —"}
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: "right" }}>
+                                            {showRoundScore && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, scale: 0.8 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    transition={{ duration: 0.4 }}
+                                                    style={{
+                                                        fontSize: "1rem",
+                                                        color:
+                                                            roundScore > 0
+                                                                ? "#7CFC00"
+                                                                : roundScore < 0
+                                                                    ? "#ff6961"
+                                                                    : "white",
+                                                    }}
+                                                >
+                                                    {roundScore > 0 ? `+${roundScore}` : roundScore}
+                                                </motion.div>
+                                            )}
+                                            <div
+                                                style={{
+                                                    fontSize: "0.9rem",
+                                                    opacity: 0.7,
+                                                    marginTop: "0.2rem",
+                                                }}
+                                            >
+                                                Total: {scores[player]}
+                                            </div>
+                                        </div>
+                                    </div>
                                 );
                             })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                        </div>
+                    );
+
+                    return (
+                        <>
+                            {/* LEFT PLAYERS */}
+                            <div style={{ flex: "0 0 auto" }}>{renderPlayerList(leftPlayers)}</div>
+
+                            {/* CENTER TABLE */}
+                            <div
+                                style={{
+                                    background: "rgba(255,255,255,0.1)",
+                                    backdropFilter: "blur(10px)",
+                                    borderRadius: 16,
+                                    padding: "1.5rem 1.2rem",
+                                    width: "480px",
+                                    minHeight: "450px",
+                                    boxShadow: "0 0 20px rgba(0,0,0,0.4)",
+                                    border: "1px solid rgba(255,255,255,0.15)",
+                                }}
+                            >
+                                <h3
+                                    style={{
+                                        textAlign: "center",
+                                        fontWeight: 500,
+                                        letterSpacing: "1px",
+                                        marginBottom: "1rem",
+                                    }}
+                                >
+                                    Answers
+                                </h3>
+                                <table
+                                    style={{
+                                        width: "100%",
+                                        borderCollapse: "collapse",
+                                        textAlign: "left",
+                                    }}
+                                >
+                                    <thead>
+                                    <tr style={{ opacity: 0.7, fontSize: "1rem" }}>
+                                        <th>#</th>
+                                        <th>Answer</th>
+                                        <th>Player</th>
+                                        <th>Score</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {allAnswersList.map((ans, idx) => {
+                                        const revealedNow = revealIndex > idx;
+                                        const guessedBy = revealedNow
+                                            ? answers.filter(
+                                                (a) =>
+                                                    a.answer.toLowerCase() ===
+                                                    ans.text.toLowerCase()
+                                            )
+                                            : [];
+                                        return (
+                                            <motion.tr
+                                                key={ans.text}
+                                                initial={{ opacity: 0 }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    backgroundColor: revealedNow
+                                                        ? ans.tension
+                                                            ? [
+                                                                "rgba(255,80,80,0.3)",
+                                                                "rgba(255,80,80,0.1)",
+                                                            ]
+                                                            : [
+                                                                "rgba(0,255,0,0.3)",
+                                                                "rgba(0,255,0,0.05)",
+                                                            ]
+                                                        : "transparent",
+                                                }}
+                                                transition={{
+                                                    duration: revealedNow ? 1.2 : 0.5,
+                                                    ease: "easeInOut",
+                                                }}
+                                            >
+                                                <td>{ans.index}</td>
+                                                <td>{revealedNow ? ans.text : "— hidden —"}</td>
+                                                <td>
+                                                    {revealedNow && guessedBy.length > 0
+                                                        ? guessedBy
+                                                            .map((g) => g.player)
+                                                            .join(", ")
+                                                        : ""}
+                                                </td>
+                                                <td>
+                                                    {revealedNow && guessedBy.length > 0
+                                                        ? guessedBy
+                                                            .map((g) =>
+                                                                g.score! > 0
+                                                                    ? `+${g.score}`
+                                                                    : g.score
+                                                            )
+                                                            .join(", ")
+                                                        : ""}
+                                                </td>
+                                            </motion.tr>
+                                        );
+                                    })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* RIGHT PLAYERS */}
+                            <div style={{ flex: "0 0 auto" }}>
+                                {renderPlayerList(rightPlayers)}
+                            </div>
+                        </>
+                    );
+                })()}
             </main>
 
-            {/* === BOTTOM INPUT === */}
+            {/* === FOOTER INPUT === */}
             <footer
                 style={{
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
-                    background: "rgba(255,255,255,0.05)",
-                    padding: "1rem 0",
-                    borderTop: "1px solid rgba(255,255,255,0.1)",
-                    overflow: "visible",
+                    padding: "2rem 0 3rem 0",
+                    background: "transparent",
                 }}
             >
                 {!revealed && (
@@ -388,10 +407,21 @@ export default function GameCenter({
                                 <p style={{ marginBottom: "0.8rem", fontSize: "1.3rem" }}>
                                     <strong>{playerNames[currentPlayer]}</strong>, your turn:
                                 </p>
-                                <AnswerInput
-                                    onSubmit={handleAnswerSubmit}
-                                    category={question.answersCategory}
-                                />
+                                <div
+                                    style={{
+                                        background: "rgba(255,255,255,0.08)",
+                                        padding: "1.5rem 2rem",
+                                        borderRadius: 12,
+                                        boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+                                        width: "60%",
+                                        maxWidth: "700px",
+                                    }}
+                                >
+                                    <AnswerInput
+                                        onSubmit={handleAnswerSubmit}
+                                        category={question.answersCategory}
+                                    />
+                                </div>
                             </>
                         ) : (
                             <button
@@ -426,6 +456,7 @@ export default function GameCenter({
                             color: "white",
                             fontWeight: "bold",
                             cursor: "pointer",
+                            marginTop: "1rem",
                         }}
                     >
                         {currentQuestionIndex + 1 < questions.length
@@ -438,7 +469,7 @@ export default function GameCenter({
     );
 }
 
-/* === Autocomplete Input Component remains unchanged === */
+/* === Autocomplete Input Component (unchanged, just kept clean) === */
 const AnswerInput: React.FC<{ onSubmit: (answer: string) => void; category: string }> = ({
                                                                                              onSubmit,
                                                                                              category,
@@ -529,7 +560,7 @@ const AnswerInput: React.FC<{ onSubmit: (answer: string) => void; category: stri
                 flexDirection: "column",
                 alignItems: "center",
                 position: "relative",
-                width: "50%",
+                width: "100%",
             }}
         >
             <input

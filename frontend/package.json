@@ -5,6 +5,7 @@
   "type": "module",
   "homepage": "https://palfos23.github.io/tens10n/",
   "scripts": {
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "predeploy": "npm run build && cp dist/index.html dist/404.html && sh -c ': > dist/.nojekyll'",
     "deploy": "gh-pages -d dist -b gh-pages -f --dotfiles"
