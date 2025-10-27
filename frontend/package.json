@@ -5,8 +5,9 @@
   "type": "module",
   "homepage": "https://palfos23.github.io/tens10n/",
   "scripts": {
-    "predeploy": "vite build",
-    "deploy": "gh-pages -d dist"
+    "build": "tsc -b && vite build",
+    "predeploy": "npm run build && cp dist/index.html dist/404.html && sh -c ': > dist/.nojekyll'",
+    "deploy": "gh-pages -d dist -b gh-pages -f --dotfiles"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
