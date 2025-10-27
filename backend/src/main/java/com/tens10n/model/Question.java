@@ -10,6 +10,9 @@ public class Question {
     private Map<String, String> answers;
     private Map<String, String> tensionAnswers;
 
+    // 👇 Add this new field
+    private String answersCategory;
+
     // Getters and Setters
     public String getQuestionId() { return questionId; }
     public void setQuestionId(String questionId) { this.questionId = questionId; }
@@ -26,4 +29,7 @@ public class Question {
     public Map<String, String> getTensionAnswers() { return tensionAnswers; }
     public void setTensionAnswers(Map<String, String> tensionAnswers) { this.tensionAnswers = tensionAnswers; }
 
+    // 👇 New getter/setter for the category
+    public String getAnswersCategory() { return answersCategory; }
+    public void setAnswersCategory(String answersCategory) { this.answersCategory = answersCategory; }
 }

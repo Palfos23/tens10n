@@ -7,9 +7,7 @@ import com.tens10n.model.*;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,13 +15,28 @@ public class QuestionService {
 
     private final ObjectMapper mapper;
     private final List<Question> questions;
+    private final Map<String, List<String>> categoryAnswers;
     private final File questionFile;
 
     public QuestionService(ObjectMapper mapper) throws Exception {
         this.mapper = mapper;
+
+        // Read from JSON file
         InputStream is = getClass().getResourceAsStream("/quiz.json");
         QuestionList questionList = mapper.readValue(is, QuestionList.class);
         this.questions = questionList.getQuestions();
+
+        // Flatten answersCategories list into a single map
+        if (questionList.getAnswersCategories() != null && !questionList.getAnswersCategories().isEmpty()) {
+            Map<String, List<String>> raw = questionList.getAnswersCategories().get(0);
+            this.categoryAnswers = new HashMap<>();
+            for (Map.Entry<String, List<String>> entry : raw.entrySet()) {
+                this.categoryAnswers.put(entry.getKey().toLowerCase(), entry.getValue());
+            }
+        } else {
+            this.categoryAnswers = new HashMap<>();
+        }
+
 
         // Locate file path for saving updates
         this.questionFile = Paths.get("src/main/resources/quiz.json").toFile();
@@ -65,10 +78,17 @@ public class QuestionService {
         return null;
     }
 
+    public List<String> getAnswersByCategory(String category) {
+        if (category == null) return Collections.emptyList();
+
+        String normalized = category.toLowerCase().trim();
+        return categoryAnswers.getOrDefault(normalized, Collections.emptyList());
+    }
+
     private void saveToFile() throws Exception {
         QuestionList updatedList = new QuestionList();
         updatedList.setQuestions(questions);
+        updatedList.setAnswersCategories(Collections.singletonList(categoryAnswers));
         mapper.writerWithDefaultPrettyPrinter().writeValue(questionFile, updatedList);
     }
 }
-

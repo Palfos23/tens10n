@@ -35,3 +35,13 @@ export async function fetchRandomQuestions(count = 5): Promise<QuestionView[]> {
   const data = await res.json();
   return normalize(data);
 }
+
+export async function fetchPossibleAnswers(category: string): Promise<string[]> {
+    const res = await fetch(
+        `http://localhost:8080/api/answers?category=${encodeURIComponent(category)}`
+    );
+    if (!res.ok) throw new Error(`Failed to fetch possible answers: ${res.statusText}`);
+    return await res.json();
+}
+
+

@@ -4,6 +4,7 @@ import type { QuestionView } from "./types";
 import LandingPage from "./LandingPage";
 import PlayerSetup from "./PlayerSetup";
 import GameCenter from "./GameCenter";
+import GameOver from "./GameOver";
 
 export default function App() {
     const [questions, setQuestions] = useState<QuestionView[]>([]);
@@ -13,6 +14,7 @@ export default function App() {
     const [numQuestions, setNumQuestions] = useState(5);
     const [stage, setStage] = useState<"landing" | "setup" | "game" | "done">("landing");
     const [playerNames, setPlayerNames] = useState<string[]>([]);
+    const [finalScores, setFinalScores] = useState<Record<string, number>>({}); // ✅ new
 
     const handleCreateGame = async (p: number, q: number) => {
         setNumPlayers(p);
@@ -27,6 +29,20 @@ export default function App() {
         } finally {
             setLoading(false);
         }
+    };
+
+    // ✅ Called when GameCenter finishes
+    const handleGameOver = (scores: Record<string, number>) => {
+        setFinalScores(scores);
+        setStage("done");
+    };
+
+    // ✅ Reset game to start over
+    const resetGame = () => {
+        setQuestions([]);
+        setPlayerNames([]);
+        setFinalScores({});
+        setStage("landing");
     };
 
     if (stage === "landing") {
@@ -50,19 +66,13 @@ export default function App() {
             <GameCenter
                 questions={questions}
                 playerNames={playerNames}
-                onGameOver={() => setStage("done")}
+                onGameOver={handleGameOver} // ✅ pass scores up
             />
         );
     }
 
     if (stage === "done") {
-        return (
-            <div style={{ textAlign: "center", marginTop: "4rem" }}>
-                <h1>Game Over 🎉</h1>
-                <p>Thanks for playing Tens10n!</p>
-                <button onClick={() => setStage("landing")}>Play Again</button>
-            </div>
-        );
+        return <GameOver scores={finalScores} onPlayAgain={resetGame} />;
     }
 
     return null;

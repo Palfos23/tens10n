@@ -1,11 +1,13 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import React, { useState, useEffect } from "react";
 import type { QuestionView } from "./types";
+import { fetchPossibleAnswers } from "./api"; // fetches from /api/answers
 
+// ✅ Updated: onGameOver now expects scores
 interface GameCenterProps {
     questions: QuestionView[];
     playerNames: string[];
-    onGameOver: () => void;
+    onGameOver: (scores: Record<string, number>) => void;
 }
 
 interface PlayerAnswer {
@@ -32,17 +34,10 @@ export default function GameCenter({
 
     const question = questions[currentQuestionIndex];
 
+    // combine all answers (top + tension)
     const allAnswersList = [
-        ...question.answers.map((a) => ({
-            text: a.text,
-            index: a.index,
-            tension: false,
-        })),
-        ...question.tensionAnswers.map((a) => ({
-            text: a.text,
-            index: a.index,
-            tension: true,
-        })),
+        ...question.answers.map((a) => ({ text: a.text, index: a.index, tension: false })),
+        ...question.tensionAnswers.map((a) => ({ text: a.text, index: a.index, tension: true })),
     ];
 
     const handleAnswerSubmit = (answer: string) => {
@@ -52,9 +47,7 @@ export default function GameCenter({
             { player: playerNames[currentPlayer], answer: answer.trim() },
         ];
         setAnswers(newAnswers);
-        setCurrentPlayer((p) =>
-            p + 1 < playerNames.length ? p + 1 : 0
-        );
+        setCurrentPlayer((p) => (p + 1 < playerNames.length ? p + 1 : 0));
     };
 
     const handleReveal = () => {
@@ -84,10 +77,11 @@ export default function GameCenter({
         setRevealIndex(0);
     };
 
+    // reveal gradually
     useEffect(() => {
         if (!revealed) return;
         if (revealIndex < allAnswersList.length) {
-            const delay = 1500 + Math.random() * 500;
+            const delay = 1600 + Math.random() * 600;
             const timer = setTimeout(() => {
                 const next = revealIndex + 1;
                 setRevealIndex(next);
@@ -109,6 +103,7 @@ export default function GameCenter({
         }
     }, [revealed, revealIndex, allAnswersList, answers, pendingScores, scores]);
 
+    // ✅ FIXED: now passes scores to App
     const handleNextQuestion = () => {
         if (currentQuestionIndex + 1 < questions.length) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -117,7 +112,7 @@ export default function GameCenter({
             setCurrentPlayer(0);
             setRevealIndex(0);
         } else {
-            onGameOver();
+            onGameOver(scores); // ✅ send final scores up
         }
     };
 
@@ -135,7 +130,7 @@ export default function GameCenter({
                 overflow: "hidden",
             }}
         >
-            {/* === TOP: QUESTION === */}
+            {/* === TOP === */}
             <header
                 style={{
                     display: "flex",
@@ -180,7 +175,7 @@ export default function GameCenter({
                     width: "100%",
                 }}
             >
-                {/* LEFT: Players */}
+                {/* LEFT PANEL */}
                 <div
                     style={{
                         paddingLeft: "8%",
@@ -194,14 +189,15 @@ export default function GameCenter({
                         const pa = answers.find((a) => a.player === player);
                         const roundScore = pa?.score ?? 0;
                         const answerInList = pa?.index !== undefined;
-
                         const theirAnswerRevealed =
                             revealed &&
                             answerInList &&
                             allAnswersList
                                 .slice(0, revealIndex)
-                                .some((ans) => ans.text.toLowerCase() === (pa?.answer ?? "").toLowerCase());
-
+                                .some(
+                                    (ans) =>
+                                        ans.text.toLowerCase() === (pa?.answer ?? "").toLowerCase()
+                                );
                         const allRevealed = revealIndex >= allAnswersList.length;
                         const showRoundScore =
                             revealed &&
@@ -233,7 +229,6 @@ export default function GameCenter({
                                         {pa ? pa.answer : "— awaiting answer —"}
                                     </div>
                                 </div>
-
                                 <div style={{ textAlign: "right" }}>
                                     {showRoundScore && (
                                         <motion.div
@@ -271,18 +266,18 @@ export default function GameCenter({
                 {/* SPACER */}
                 <div></div>
 
-                {/* RIGHT: Answers Table */}
+                {/* RIGHT TABLE */}
                 <div
                     style={{
                         display: "flex",
-                        justifyContent: "flex-start", // ✅ pull table inward (to the left)
-                        paddingLeft: "4rem", // ✅ space from right edge inward
+                        justifyContent: "flex-start",
+                        paddingLeft: "4rem",
                         paddingRight: "2rem",
                     }}
                 >
                     <div
                         style={{
-                            background: "rgba(255, 255, 255, 0.1)",
+                            background: "rgba(255,255,255,0.1)",
                             backdropFilter: "blur(10px)",
                             borderRadius: 16,
                             padding: "1.5rem 1.2rem",
@@ -318,68 +313,62 @@ export default function GameCenter({
                             </tr>
                             </thead>
                             <tbody>
-                            {revealed ? (
-                                <AnimatePresence>
-                                    {allAnswersList.slice(0, revealIndex).map((ans) => {
-                                        const guessedBy = answers.filter(
-                                            (a) => a.answer.toLowerCase() === ans.text.toLowerCase()
-                                        );
-                                        return (
-                                            <motion.tr
-                                                key={ans.text}
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ duration: 0.5 }}
-                                                style={{
-                                                    backgroundColor: ans.tension
-                                                        ? "rgba(255, 80, 80, 0.15)" // 🔴 Red tint
-                                                        : "rgba(0,255,0,0.05)",
-                                                }}
-                                            >
-                                                <td>{ans.index}</td>
-                                                <td>{ans.text}</td>
-                                                <td>
-                                                    {guessedBy.length > 0
-                                                        ? guessedBy.map((g) => g.player).join(", ")
-                                                        : ""}
-                                                </td>
-                                                <td>
-                                                    {guessedBy.length > 0
-                                                        ? guessedBy
-                                                            .map((g) =>
-                                                                g.score! > 0 ? `+${g.score}` : g.score
-                                                            )
-                                                            .join(", ")
-                                                        : ""}
-                                                </td>
-                                            </motion.tr>
-                                        );
-                                    })}
-                                </AnimatePresence>
-                            ) : (
-                                allAnswersList.map((a) => (
-                                    <tr key={a.text}>
-                                        <td style={{ opacity: 0.3 }}>{a.index}</td>
-                                        <td
-                                            style={{
-                                                color: "rgba(255,255,255,0.15)",
-                                                fontStyle: "italic",
-                                            }}
-                                        >
-                                            — hidden —
+                            {allAnswersList.map((ans, idx) => {
+                                const revealedNow = revealIndex > idx;
+                                const guessedBy = revealedNow
+                                    ? answers.filter(
+                                        (a) => a.answer.toLowerCase() === ans.text.toLowerCase()
+                                    )
+                                    : [];
+                                return (
+                                    <motion.tr
+                                        key={ans.text}
+                                        initial={{ opacity: 0 }}
+                                        animate={{
+                                            opacity: 1,
+                                            backgroundColor: revealedNow
+                                                ? ans.tension
+                                                    ? [
+                                                        "rgba(255,80,80,0.3)",
+                                                        "rgba(255,80,80,0.1)",
+                                                    ]
+                                                    : [
+                                                        "rgba(0,255,0,0.3)",
+                                                        "rgba(0,255,0,0.05)",
+                                                    ]
+                                                : "transparent",
+                                        }}
+                                        transition={{
+                                            duration: revealedNow ? 1.2 : 0.5,
+                                            ease: "easeInOut",
+                                        }}
+                                    >
+                                        <td>{ans.index}</td>
+                                        <td>{revealedNow ? ans.text : "— hidden —"}</td>
+                                        <td>
+                                            {revealedNow && guessedBy.length > 0
+                                                ? guessedBy.map((g) => g.player).join(", ")
+                                                : ""}
                                         </td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                ))
-                            )}
+                                        <td>
+                                            {revealedNow && guessedBy.length > 0
+                                                ? guessedBy
+                                                    .map((g) =>
+                                                        g.score! > 0 ? `+${g.score}` : g.score
+                                                    )
+                                                    .join(", ")
+                                                : ""}
+                                        </td>
+                                    </motion.tr>
+                                );
+                            })}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </main>
 
-            {/* BOTTOM: Input */}
+            {/* === BOTTOM INPUT === */}
             <footer
                 style={{
                     display: "flex",
@@ -389,6 +378,7 @@ export default function GameCenter({
                     background: "rgba(255,255,255,0.05)",
                     padding: "1rem 0",
                     borderTop: "1px solid rgba(255,255,255,0.1)",
+                    overflow: "visible",
                 }}
             >
                 {!revealed && (
@@ -398,7 +388,10 @@ export default function GameCenter({
                                 <p style={{ marginBottom: "0.8rem", fontSize: "1.3rem" }}>
                                     <strong>{playerNames[currentPlayer]}</strong>, your turn:
                                 </p>
-                                <AnswerInput onSubmit={handleAnswerSubmit} />
+                                <AnswerInput
+                                    onSubmit={handleAnswerSubmit}
+                                    category={question.answersCategory}
+                                />
                             </>
                         ) : (
                             <button
@@ -435,7 +428,9 @@ export default function GameCenter({
                             cursor: "pointer",
                         }}
                     >
-                        {currentQuestionIndex + 1 < questions.length ? "Next Question" : "Finish Game"}
+                        {currentQuestionIndex + 1 < questions.length
+                            ? "Next Question"
+                            : "Finish Game"}
                     </button>
                 )}
             </footer>
@@ -443,28 +438,110 @@ export default function GameCenter({
     );
 }
 
-// === Input ===
-const AnswerInput: React.FC<{ onSubmit: (answer: string) => void }> = ({
-                                                                           onSubmit,
-                                                                       }) => {
+/* === Autocomplete Input Component remains unchanged === */
+const AnswerInput: React.FC<{ onSubmit: (answer: string) => void; category: string }> = ({
+                                                                                             onSubmit,
+                                                                                             category,
+                                                                                         }) => {
     const [value, setValue] = useState("");
+    const [allOptions, setAllOptions] = useState<string[]>([]);
+    const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [validSelection, setValidSelection] = useState(false);
+    const cacheRef = React.useRef<Map<string, string[]>>(new Map());
+
+    useEffect(() => {
+        async function loadOptions() {
+            if (!category) return;
+            const key = category.toLowerCase();
+            if (cacheRef.current.has(key)) {
+                setAllOptions(cacheRef.current.get(key)!);
+                return;
+            }
+            try {
+                const options = await fetchPossibleAnswers(key);
+                setAllOptions(options);
+                cacheRef.current.set(key, options);
+                console.log("✅ All possible answers loaded:", options);
+            } catch (e) {
+                console.error("Failed to load possible answers:", e);
+            }
+        }
+        loadOptions();
+    }, [category]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setValue(newValue);
+        setValidSelection(false);
+
+        if (newValue.length >= 3) {
+            const filtered = allOptions
+                .filter((opt) => opt.toLowerCase().includes(newValue.toLowerCase()))
+                .slice(0, 12);
+            setFilteredOptions(filtered);
+            setShowDropdown(true);
+        } else {
+            setFilteredOptions([]);
+            setShowDropdown(false);
+        }
+    };
+
+    const handleSelect = (selected: string) => {
+        setValue(selected);
+        setShowDropdown(false);
+        setValidSelection(true);
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (validSelection) {
+            onSubmit(value);
+            setValue("");
+            setValidSelection(false);
+        } else {
+            alert("Please select a valid answer from the list.");
+        }
+    };
+
+    const [highlight, setHighlight] = useState<number>(-1);
+    useEffect(() => setHighlight(-1), [showDropdown, filteredOptions]);
+
+    const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!showDropdown || filteredOptions.length === 0) return;
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setHighlight((h) => Math.min(h + 1, filteredOptions.length - 1));
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setHighlight((h) => Math.max(h - 1, 0));
+        } else if (e.key === "Enter" && highlight >= 0) {
+            e.preventDefault();
+            handleSelect(filteredOptions[highlight]);
+        } else if (e.key === "Escape") setShowDropdown(false);
+    };
 
     return (
         <form
-            onSubmit={(e) => {
-                e.preventDefault();
-                if (value.trim()) onSubmit(value);
-                setValue("");
+            onSubmit={handleSubmit}
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                position: "relative",
+                width: "50%",
             }}
-            style={{ display: "flex", justifyContent: "center", gap: "10px" }}
         >
             <input
                 type="text"
-                placeholder="Enter answer"
+                placeholder="Start typing your answer…"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={handleChange}
+                onFocus={() => value.length >= 1 && setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 180)}
+                onKeyDown={onKeyDown}
                 style={{
-                    width: "50%",
+                    width: "100%",
                     padding: "0.8rem",
                     fontSize: "1.1rem",
                     borderRadius: 10,
@@ -475,15 +552,79 @@ const AnswerInput: React.FC<{ onSubmit: (answer: string) => void }> = ({
                     outline: "none",
                 }}
             />
+
+            {showDropdown && (
+                <ul
+                    style={{
+                        listStyle: "none",
+                        margin: 0,
+                        padding: 0,
+                        position: "absolute",
+                        bottom: "110%",
+                        left: 0,
+                        width: "100%",
+                        background: "rgba(20,20,20,0.98)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        borderRadius: "10px 10px 0 0",
+                        maxHeight: "220px",
+                        overflowY: "auto",
+                        zIndex: 9999,
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                    }}
+                >
+                    {(filteredOptions.length > 0 ? filteredOptions : ["— No matches —"]).map(
+                        (opt, i) => {
+                            const isPlaceholder = opt === "— No matches —";
+                            const active = i === highlight && !isPlaceholder;
+                            return (
+                                <li
+                                    key={`${opt}-${i}`}
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => !isPlaceholder && handleSelect(opt)}
+                                    onMouseEnter={() => !isPlaceholder && setHighlight(i)}
+                                    style={{
+                                        padding: "0.65rem 1rem",
+                                        cursor: isPlaceholder ? "default" : "pointer",
+                                        textAlign: "center",
+                                        color: "white",
+                                        background: active
+                                            ? "rgba(255,255,255,0.12)"
+                                            : "transparent",
+                                        borderBottom:
+                                            i <
+                                            (filteredOptions.length > 0
+                                                ? filteredOptions.length
+                                                : 1) -
+                                            1
+                                                ? "1px solid rgba(255,255,255,0.06)"
+                                                : "none",
+                                        opacity: isPlaceholder ? 0.7 : 1,
+                                        fontStyle: isPlaceholder ? "italic" : "normal",
+                                        userSelect: "none",
+                                    }}
+                                >
+                                    {opt}
+                                </li>
+                            );
+                        }
+                    )}
+                </ul>
+            )}
+
             <button
                 type="submit"
                 style={{
+                    marginTop: "1rem",
                     padding: "0.8rem 1.6rem",
                     borderRadius: 10,
                     border: "none",
-                    background: "linear-gradient(135deg, #00C9FF, #92FE9D)",
+                    background: validSelection
+                        ? "linear-gradient(135deg, #00C9FF, #92FE9D)"
+                        : "gray",
+                    color: "white",
                     fontWeight: "bold",
-                    cursor: "pointer",
+                    cursor: validSelection ? "pointer" : "not-allowed",
+                    opacity: validSelection ? 1 : 0.6,
                 }}
             >
                 Submit
