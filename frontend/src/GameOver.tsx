@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { useEffect } from "react";
+import confetti from "canvas-confetti";
 
 interface GameOverProps {
     scores: Record<string, number>;
@@ -8,6 +10,38 @@ interface GameOverProps {
 export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
     // Sort players by score (highest first)
     const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const winner = sortedScores[0]?.[0] ?? null;
+
+    // 🎊 Trigger confetti once when the winner appears
+    useEffect(() => {
+        if (!winner) return;
+
+        const duration = 2500;
+        const end = Date.now() + duration;
+
+        const frame = () => {
+            // launch confetti bursts from both sides
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ["#ffae00", "#00c6ff", "#ffffff"],
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ["#ffae00", "#00c6ff", "#ffffff"],
+            });
+            if (Date.now() < end) requestAnimationFrame(frame);
+        };
+        frame();
+
+        // optional cleanup
+        return () => confetti.reset();
+    }, [winner]);
 
     return (
         <div
@@ -38,10 +72,26 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                 Game Over 🎉
             </motion.h1>
 
-            <motion.h2
+            {winner && (
+                <motion.h2
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 1 }}
+                    style={{
+                        fontSize: "1.8rem",
+                        fontWeight: 600,
+                        color: "#FFD700",
+                        marginBottom: "1rem",
+                    }}
+                >
+                    🏆 Winner: {winner}
+                </motion.h2>
+            )}
+
+            <motion.h3
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 1 }}
+                transition={{ delay: 0.4, duration: 1 }}
                 style={{
                     fontSize: "1.4rem",
                     fontWeight: 400,
@@ -50,7 +100,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                 }}
             >
                 Final Scores
-            </motion.h2>
+            </motion.h3>
 
             <motion.div
                 initial={{ opacity: 0 }}
@@ -77,7 +127,14 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                     <tr style={{ opacity: 0.7, fontSize: "1.1rem" }}>
                         <th style={{ padding: "0.5rem" }}>#</th>
                         <th style={{ padding: "0.5rem" }}>Player</th>
-                        <th style={{ padding: "0.5rem", textAlign: "right" }}>Score</th>
+                        <th
+                            style={{
+                                padding: "0.5rem",
+                                textAlign: "right",
+                            }}
+                        >
+                            Score
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -103,7 +160,12 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                                 style={{
                                     padding: "0.8rem",
                                     textAlign: "right",
-                                    color: score > 0 ? "#7CFC00" : score < 0 ? "#ff6961" : "white",
+                                    color:
+                                        score > 0
+                                            ? "#7CFC00"
+                                            : score < 0
+                                                ? "#ff6961"
+                                                : "white",
                                 }}
                             >
                                 {score}
