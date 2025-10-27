@@ -146,7 +146,7 @@ export default function GameCenter({
                 }}
             >
                 <h2 style={{ fontSize: "1.4rem", opacity: 0.8, marginBottom: "0.5rem" }}>
-                    Question {currentQuestionIndex + 1} / {questions.length}
+                    Spørsmål {currentQuestionIndex + 1} / {questions.length}
                 </h2>
                 <h1
                     style={{
@@ -167,7 +167,7 @@ export default function GameCenter({
                         fontStyle: "italic",
                     }}
                 >
-                    Tension answers: {question.tensionAnswers.length}
+                    Antall "Tension svar": {question.tensionAnswers.length}
                 </p>
             </header>
 
@@ -240,7 +240,7 @@ export default function GameCenter({
                                                     fontStyle: pa ? "normal" : "italic",
                                                 }}
                                             >
-                                                {pa ? pa.answer : "— awaiting answer —"}
+                                                {pa ? pa.answer : "— venter på svar —"}
                                             </div>
                                         </div>
                                         <div style={{ textAlign: "right" }}>
@@ -269,7 +269,7 @@ export default function GameCenter({
                                                     marginTop: "0.2rem",
                                                 }}
                                             >
-                                                Total: {scores[player]}
+                                                Totalt: {scores[player]}
                                             </div>
                                         </div>
                                     </div>
@@ -355,7 +355,7 @@ export default function GameCenter({
                                                 }}
                                             >
                                                 <td>{ans.index}</td>
-                                                <td>{revealedNow ? ans.text : "— hidden —"}</td>
+                                                <td>{revealedNow ? ans.text : "— ??????? —"}</td>
                                                 <td>
                                                     {revealedNow && guessedBy.length > 0
                                                         ? guessedBy
@@ -406,7 +406,7 @@ export default function GameCenter({
                         {!allAnswered ? (
                             <>
                                 <p style={{ marginBottom: "0.8rem", fontSize: "1.3rem" }}>
-                                    <strong>{playerNames[currentPlayer]}</strong>, your turn:
+                                    <strong>{playerNames[currentPlayer]}</strong>, din tur:
                                 </p>
                                 <div
                                     style={{
@@ -566,7 +566,7 @@ const AnswerInput: React.FC<{ onSubmit: (answer: string) => void; category: stri
         >
             <input
                 type="text"
-                placeholder="Start typing your answer…"
+                placeholder="Svar her…"
                 value={value}
                 onChange={handleChange}
                 onFocus={() => value.length >= 1 && setShowDropdown(true)}
@@ -659,7 +659,7 @@ const AnswerInput: React.FC<{ onSubmit: (answer: string) => void; category: stri
                     opacity: validSelection ? 1 : 0.6,
                 }}
             >
-                Submit
+                Send inn
             </button>
         </form>
     );
