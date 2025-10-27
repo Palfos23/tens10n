@@ -17,22 +17,105 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
     const allNamed = names.every((n) => n.trim().length > 0);
 
     return (
-        <div style={{ textAlign: "center" }}>
-            <h2>Enter Player Names</h2>
-            {names.map((name, i) => (
-                <div key={i} style={{ margin: "8px 0" }}>
-                    <input
-                        type="text"
-                        placeholder={`Player ${i + 1}`}
-                        value={name}
-                        onChange={(e) => handleChange(i, e.target.value)}
-                        style={{ padding: "6px 10px", fontSize: 16 }}
-                    />
+        <div
+            style={{
+                height: "100vh",
+                width: "100vw",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                background: "radial-gradient(circle at top, #141E30, #243B55)",
+            }}
+        >
+            <div
+                style={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    backdropFilter: "blur(10px)",
+                    borderRadius: 16,
+                    padding: "2.5rem 3rem",
+                    textAlign: "center",
+                    boxShadow: "0 0 20px rgba(0,0,0,0.4)",
+                    color: "white",
+                    width: "min(90%, 400px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center", // 👈 center inputs and button
+                }}
+            >
+                <h2
+                    style={{
+                        marginBottom: "1.5rem",
+                        fontSize: "1.8rem",
+                        letterSpacing: "1px",
+                    }}
+                >
+                    Enter Player Names
+                </h2>
+
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "1rem",
+                        width: "100%",
+                        alignItems: "center", // 👈 keeps input fields centered
+                    }}
+                >
+                    {names.map((name, i) => (
+                        <input
+                            key={i}
+                            type="text"
+                            placeholder={`Player ${i + 1}`}
+                            value={name}
+                            onChange={(e) => handleChange(i, e.target.value)}
+                            style={{
+                                width: "80%", // 👈 makes input smaller & centered
+                                padding: "0.6rem 0.8rem",
+                                fontSize: "1rem",
+                                borderRadius: 8,
+                                border: "1px solid rgba(255,255,255,0.3)",
+                                background: "rgba(255,255,255,0.15)",
+                                color: "white",
+                                textAlign: "center",
+                                outline: "none",
+                            }}
+                            onFocus={(e) =>
+                                (e.target.style.border = "1px solid rgba(255,255,255,0.7)")
+                            }
+                            onBlur={(e) =>
+                                (e.target.style.border = "1px solid rgba(255,255,255,0.3)")
+                            }
+                        />
+                    ))}
                 </div>
-            ))}
-            <button disabled={!allNamed} onClick={() => onStart(names)}>
-                Start Game
-            </button>
+
+                <button
+                    disabled={!allNamed}
+                    onClick={() => onStart(names)}
+                    style={{
+                        marginTop: "2rem",
+                        padding: "0.8rem 1.6rem",
+                        fontSize: "1.1rem",
+                        fontWeight: "bold",
+                        borderRadius: 8,
+                        border: "none",
+                        cursor: allNamed ? "pointer" : "not-allowed",
+                        background: allNamed
+                            ? "linear-gradient(135deg, #00C9FF, #92FE9D)"
+                            : "rgba(255,255,255,0.2)",
+                        color: allNamed ? "#111" : "rgba(255,255,255,0.5)",
+                        transition: "transform 0.2s ease, opacity 0.3s ease",
+                    }}
+                    onMouseEnter={(e) =>
+                        allNamed && (e.currentTarget.style.transform = "scale(1.05)")
+                    }
+                    onMouseLeave={(e) =>
+                        allNamed && (e.currentTarget.style.transform = "scale(1)")
+                    }
+                >
+                    Start Game
+                </button>
+            </div>
         </div>
     );
 };
