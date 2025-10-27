@@ -304,7 +304,7 @@ export default function GameCenter({
                                         marginBottom: "1rem",
                                     }}
                                 >
-                                    Answers
+                                    Svar
                                 </h3>
                                 <table
                                     style={{
@@ -316,9 +316,9 @@ export default function GameCenter({
                                     <thead>
                                     <tr style={{ opacity: 0.7, fontSize: "1rem" }}>
                                         <th>#</th>
-                                        <th>Answer</th>
-                                        <th>Player</th>
-                                        <th>Score</th>
+                                        <th>Svar</th>
+                                        <th>Spiller</th>
+                                        <th>Poengsum</th>
                                     </tr>
                                     </thead>
                                     <tbody>

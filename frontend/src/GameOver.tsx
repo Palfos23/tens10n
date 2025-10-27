@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
+import StarBackground from "./StarBackground";
 
 interface GameOverProps {
     scores: Record<string, number>;
@@ -45,6 +46,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
     }, [winner]);
 
     return (
+
         <div
             style={{
                 height: "100vh",
@@ -53,13 +55,13 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "linear-gradient(180deg, #0f2027, #203a43, #2c5364)",
                 color: "white",
                 textAlign: "center",
                 overflow: "hidden",
                 padding: "2rem",
             }}
         >
+            <StarBackground />
             <motion.h1
                 initial={{ opacity: 0, y: -50 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -70,7 +72,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                     marginBottom: "1rem",
                 }}
             >
-                Game Over 🎉
+                Spillet er ferdig 🎉
             </motion.h1>
 
             {winner && (
@@ -85,7 +87,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                         marginBottom: "1rem",
                     }}
                 >
-                    🏆 Winner: {winner}
+                    🏆 Vinner: {winner}
                 </motion.h2>
             )}
 
@@ -100,7 +102,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                     marginBottom: "2rem",
                 }}
             >
-                Final Scores
+                Resultater
             </motion.h3>
 
             <motion.div
@@ -134,7 +136,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                                 textAlign: "right",
                             }}
                         >
-                            Score
+                            Poengsum
                         </th>
                     </tr>
                     </thead>
@@ -188,7 +190,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                     fontSize: "1.3rem",
                     borderRadius: 12,
                     border: "none",
-                    background: "linear-gradient(90deg, #00c6ff, #0072ff)",
+                    background: "#4338ca",
                     color: "white",
                     fontWeight: "bold",
                     cursor: "pointer",
@@ -198,7 +200,7 @@ export default function GameOver({ scores, onPlayAgain }: GameOverProps) {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >
-                Play Again
+                Nytt Spill
             </motion.button>
         </div>
     );
