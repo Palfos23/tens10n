@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://Palfos23.github.io/tens10n",
+  "homepage": "https://palfos23.github.io/tens10n/",
   "scripts": {
     "predeploy": "vite build",
     "deploy": "gh-pages -d dist"
