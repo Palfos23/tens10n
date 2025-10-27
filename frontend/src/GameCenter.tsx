@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import React, { useState, useEffect } from "react";
 import type { QuestionView } from "./types";
 import { fetchPossibleAnswers } from "./api"; // fetches from /api/answers
+import StarBackground from "./StarBackground";
 
 interface GameCenterProps {
     questions: QuestionView[];
@@ -127,12 +128,12 @@ export default function GameCenter({
                 width: "100vw",
                 display: "flex",
                 flexDirection: "column",
-                background: "linear-gradient(180deg, #0f2027, #203a43, #2c5364)",
                 color: "white",
                 overflowY: "auto",         // ← allow vertical scrolling
                 overflowX: "hidden",
             }}
         >
+            <StarBackground />
             {/* === TOP === */}
             <header
                 style={{
@@ -432,7 +433,7 @@ export default function GameCenter({
                                     fontSize: "1.2rem",
                                     borderRadius: 10,
                                     border: "none",
-                                    background: "linear-gradient(90deg, #00c6ff, #0072ff)",
+                                    background: "#4f46e5",
                                     color: "white",
                                     fontWeight: "bold",
                                     cursor: "pointer",
@@ -452,7 +453,7 @@ export default function GameCenter({
                             fontSize: "1.2rem",
                             borderRadius: 10,
                             border: "none",
-                            background: "linear-gradient(90deg, #00c6ff, #0072ff)",
+                            background: "#4f46e5",
                             color: "white",
                             fontWeight: "bold",
                             cursor: "pointer",
@@ -650,7 +651,7 @@ const AnswerInput: React.FC<{ onSubmit: (answer: string) => void; category: stri
                     borderRadius: 10,
                     border: "none",
                     background: validSelection
-                        ? "linear-gradient(135deg, #00C9FF, #92FE9D)"
+                        ? "#4f46e5"
                         : "gray",
                     color: "white",
                     fontWeight: "bold",

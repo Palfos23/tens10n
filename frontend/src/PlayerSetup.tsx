@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import StarBackground from "./StarBackground";
 
 interface PlayerSetupProps {
     numPlayers: number;
@@ -24,9 +25,9 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                background: "radial-gradient(circle at top, #141E30, #243B55)",
             }}
         >
+            <StarBackground />
             <div
                 style={{
                     background: "rgba(255, 255, 255, 0.1)",
@@ -101,7 +102,7 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
                         border: "none",
                         cursor: allNamed ? "pointer" : "not-allowed",
                         background: allNamed
-                            ? "linear-gradient(135deg, #00C9FF, #92FE9D)"
+                            ? "#4f46e5"
                             : "rgba(255,255,255,0.2)",
                         color: allNamed ? "#111" : "rgba(255,255,255,0.5)",
                         transition: "transform 0.2s ease, opacity 0.3s ease",
