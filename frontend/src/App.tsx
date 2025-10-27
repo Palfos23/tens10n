@@ -13,18 +13,19 @@ export default function App() {
     const [playerNames, setPlayerNames] = useState<string[]>([]);
     const [finalScores, setFinalScores] = useState<Record<string, number>>({});
 
-    // ✅ Create new game and fetch random questions (always 5 for now)
-    const handleCreateGame = async (p: number) => {
+    // ✅ Accept both player count and question count
+    const handleCreateGame = async (p: number, q: number) => {
         setNumPlayers(p);
         setStage("setup");
         try {
-            const data = await fetchRandomQuestions(5); // fixed question count
+            const data = await fetchRandomQuestions(q); // ✅ use chosen number of questions
             setQuestions(data);
         } catch (e: any) {
             alert(e?.message ?? "Failed to load questions.");
             setQuestions([]);
         }
     };
+
 
     // ✅ When the game ends, store scores
     const handleGameOver = (scores: Record<string, number>) => {
