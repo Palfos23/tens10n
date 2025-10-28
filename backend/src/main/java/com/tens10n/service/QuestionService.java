@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import com.tens10n.model.Question;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class QuestionService {
@@ -18,44 +19,50 @@ public class QuestionService {
     private final List<Question> questions = new ArrayList<>();
     private final Map<String, List<String>> categoryAnswers = new HashMap<>();
 
-    // Disse peker på ressursmapper
-    private final Path questionsDir;
-    private final Path categoriesDir;
+    private final String QUESTIONS_PATH = "data/questions";
+    private final String CATEGORIES_PATH = "data/categories";
 
     public QuestionService(ObjectMapper mapper) throws Exception {
         this.mapper = mapper;
-
-        // Finn ressursbaner
-        this.questionsDir = getPathFromResources("/data/questions");
-        this.categoriesDir = getPathFromResources("/data/categories");
-
         loadAllQuestions();
         loadAllCategories();
     }
 
-    // 🔹 Laster inn alle spørsmål fra mappen
+    // 🔹 Laster inn alle spørsmål fra ressursmappen
     private void loadAllQuestions() throws IOException {
-        if (!Files.exists(questionsDir)) return;
+        List<String> files = listResourceFiles(QUESTIONS_PATH);
+        for (String filename : files) {
+            if (!filename.endsWith(".json")) continue;
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(questionsDir, "*.json")) {
-            for (Path path : stream) {
-                Question q = mapper.readValue(path.toFile(), Question.class);
+            try (InputStream is = getResourceAsStream(QUESTIONS_PATH + "/" + filename)) {
+                if (is == null) continue;
+                Question q = mapper.readValue(is, Question.class);
                 questions.add(q);
+            } catch (IOException e) {
+                System.err.println("❌ Kunne ikke lese spørsmål: " + filename);
+                e.printStackTrace();
             }
         }
+        System.out.println("✅ Lastet " + questions.size() + " spørsmål");
     }
 
-    // 🔹 Laster inn alle kategorier (hver fil = én liste)
+    // 🔹 Laster inn alle kategorier
     private void loadAllCategories() throws IOException {
-        if (!Files.exists(categoriesDir)) return;
+        List<String> files = listResourceFiles(CATEGORIES_PATH);
+        for (String filename : files) {
+            if (!filename.endsWith(".json")) continue;
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(categoriesDir, "*.json")) {
-            for (Path path : stream) {
-                String categoryName = stripExtension(path.getFileName().toString()).toLowerCase();
-                List<String> items = Arrays.asList(mapper.readValue(path.toFile(), String[].class));
+            try (InputStream is = getResourceAsStream(CATEGORIES_PATH + "/" + filename)) {
+                if (is == null) continue;
+                String categoryName = stripExtension(filename).toLowerCase();
+                List<String> items = Arrays.asList(mapper.readValue(is, String[].class));
                 categoryAnswers.put(categoryName, items);
+            } catch (IOException e) {
+                System.err.println("❌ Kunne ikke lese kategori: " + filename);
+                e.printStackTrace();
             }
         }
+        System.out.println("✅ Lastet " + categoryAnswers.size() + " kategorier");
     }
 
     // 🔹 Henter alle spørsmål
@@ -80,39 +87,28 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
-    // 🔹 Legger til nytt spørsmål (og lagrer som ny fil)
-    public Question addQuestion(Question newQuestion) throws IOException {
-        questions.add(newQuestion);
-        saveQuestionToFile(newQuestion);
-        return newQuestion;
+    // 🔹 Oppdaterer eller legger til spørsmål (kun i runtime – ikke til fil)
+    public Question addOrUpdateQuestion(Question question) {
+        questions.removeIf(q -> q.getQuestionId().equalsIgnoreCase(question.getQuestionId()));
+        questions.add(question);
+        return question;
     }
 
-    // 🔹 Oppdaterer eksisterende spørsmål
-    public Question updateQuestion(String id, Question updatedQuestion) throws IOException {
-        for (int i = 0; i < questions.size(); i++) {
-            if (questions.get(i).getQuestionId().equalsIgnoreCase(id)) {
-                questions.set(i, updatedQuestion);
-                saveQuestionToFile(updatedQuestion);
-                return updatedQuestion;
-            }
-        }
-        return null;
-    }
-
-    // 🔹 Henter liste over svar for en gitt kategori
+    // 🔹 Henter svar for kategori
     public List<String> getAnswersByCategory(String category) {
         if (category == null) return Collections.emptyList();
         return categoryAnswers.getOrDefault(category.toLowerCase().trim(), Collections.emptyList());
     }
 
+    // 🔹 Henter tilfeldige spørsmål fra hovedkategori
     public List<Question> getRandomQuestionsByMainCategory(String mainCategory, int count) {
         if (mainCategory == null || mainCategory.isBlank()) {
             return getRandomQuestions(count);
         }
 
         List<Question> filtered = questions.stream()
-                .filter(q -> q.getMainCategory() != null
-                        && q.getMainCategory().equalsIgnoreCase(mainCategory))
+                .filter(q -> q.getMainCategory() != null &&
+                        q.getMainCategory().equalsIgnoreCase(mainCategory))
                 .collect(Collectors.toList());
 
         Collections.shuffle(filtered);
@@ -121,24 +117,51 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
-    // 🔹 Lagrer et spørsmål tilbake til sin egen fil
-    private void saveQuestionToFile(Question question) throws IOException {
-        if (!Files.exists(questionsDir)) {
-            Files.createDirectories(questionsDir);
+    // 🔹 Hjelpemetode for å liste filer i ressursmappen
+    private List<String> listResourceFiles(String folder) throws IOException {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(folder)) {
+            // Hvis selve mappen ikke finnes, returner tom liste
+            if (in == null) {
+                return Collections.emptyList();
+            }
         }
 
-        Path filePath = questionsDir.resolve(question.getQuestionId() + ".json");
-        mapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), question);
+        try (var stream = getResourceListing(folder)) {
+            if (stream == null) return Collections.emptyList();
+            return stream.collect(Collectors.toList());
+        }
     }
 
-    // 🔹 Hjelpemetode for å finne resource-path (fungerer i JAR og lokalt)
-    private Path getPathFromResources(String resource) throws URISyntaxException, IOException {
-        var uri = getClass().getResource(resource);
-        if (uri == null) {
-            // Hvis ikke finnes (f.eks. første gang), lag mappen under src/main/resources manuelt
-            return Paths.get("src/main/resources" + resource);
+    // 🔹 Hjelpemetode for å få stream av filnavn fra en ressursmappe
+    private Stream<String> getResourceListing(String path) throws IOException {
+        try {
+            var uri = getClass().getClassLoader().getResource(path);
+            if (uri == null) return Stream.empty();
+
+            if (uri.getProtocol().equals("jar")) {
+                // Leser fra JAR
+                var jarPath = uri.toString().split("!")[0].replace("jar:file:", "");
+                try (FileSystem fs = FileSystems.newFileSystem(Paths.get(jarPath))) {
+                    Path folderPath = fs.getPath("/BOOT-INF/classes/" + path);
+                    if (!Files.exists(folderPath)) return Stream.empty();
+                    return Files.list(folderPath)
+                            .map(p -> p.getFileName().toString());
+                }
+            } else {
+                // Leser fra vanlig filsystem (lokalt)
+                Path dir = Paths.get(uri.toURI());
+                if (!Files.exists(dir)) return Stream.empty();
+                return Files.list(dir)
+                        .map(p -> p.getFileName().toString());
+            }
+        } catch (URISyntaxException e) {
+            throw new IOException("Feil ved lesing av ressursmappe: " + path, e);
         }
-        return Paths.get(uri.toURI());
+    }
+
+    // 🔹 Leser enkeltfil som stream
+    private InputStream getResourceAsStream(String path) {
+        return getClass().getClassLoader().getResourceAsStream(path);
     }
 
     private String stripExtension(String filename) {
