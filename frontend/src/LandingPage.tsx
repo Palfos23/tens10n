@@ -103,6 +103,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                             <select
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
+                                disabled
+                                className="blurred-select"
                             >
                                 {categories.map((cat, i) => (
                                     <option key={i} value={cat}>
@@ -110,6 +112,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                                     </option>
                                 ))}
                             </select>
+                            <p className="coming-soon">💡 Kategorivalg kommer snart!</p>
                         </div>
 
                         <button className="start-btn" onClick={handleStart}>

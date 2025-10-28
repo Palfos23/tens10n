@@ -154,3 +154,16 @@ select:hover {
     background: linear-gradient(90deg, #00e0ff, #4f46e5);
     box-shadow: 0 0 35px rgba(99, 102, 241, 0.8);
 }
+
+.blurred-select {
+    opacity: 0.5;
+    filter: blur(0.5px);
+    cursor: not-allowed;
+}
+
+.coming-soon {
+    font-size: 0.8rem;
+    color: #ccc;
+    font-style: italic;
+    margin-top: 4px;
+}
