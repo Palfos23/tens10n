@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0012",
+  "title": "Land som produserte mest vin i 2022",
+  "numTensionAnswers": 4,
+  "answers": {
+    "1": "Italia",
+    "2": "Frankrike",
+    "3": "Spania",
+    "4": "USA",
+    "5": "Australia",
+    "6": "Chile",
+    "7": "Argentina",
+    "8": "Sør-Afrika",
+    "9": "Tyskland",
+    "10": "Portugal"
+  },
+  "tensionAnswers": {
+    "11": "Russland",
+    "12": "Kina",
+    "13": "Romania",
+    "14": "New Zealand",
+    "15": ""
+  },
+  "answersCategory": "countriesOfTheWorld",
+  "mainCategory": "Geografi"
+}

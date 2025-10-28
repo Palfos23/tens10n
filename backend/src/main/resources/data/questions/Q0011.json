@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0011",
+  "title": "Mest nevnte karakterer i Harry Potter (hele serien), utenom Harry selv",
+  "numTensionAnswers": 2,
+  "answers": {
+    "1": "Ron Weasley",
+    "2": "Hermione Granger",
+    "3": "Albus Dumbledore",
+    "4": "Rubeus Hagrid",
+    "5": "Severus Snape",
+    "6": "Voldemort",
+    "7": "Sirius Black",
+    "8": "Draco Malfoy",
+    "9": "Fred Weasley",
+    "10": "Remus Lupin"
+  },
+  "tensionAnswers": {
+    "11": "George Weasley",
+    "12": "Neville Longbottom",
+    "13": "",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "charactersHP",
+  "mainCategory": "Diverse"
+}

@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0013",
+  "title": "Bundesliga 08/09 plasseringer fra 1-10",
+  "numTensionAnswers": 3,
+  "answers": {
+    "1": "VfL Wolfsburg",
+    "2": "Bayern München",
+    "3": "VfB Stuttgart",
+    "4": "Hertha Berlin",
+    "5": "Hamburger SV",
+    "6": "Borussia Dortmund",
+    "7": "TSG 1899 Hoffenheim",
+    "8": "Schalke 04",
+    "9": "Bayer Leverkusen",
+    "10": "Werder Bremen"
+  },
+  "tensionAnswers": {
+    "11": "Hannover 96",
+    "12": "FC Köln",
+    "13": "Eintracht Frankfurt",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "germanFootballTeams",
+  "mainCategory": "Fotball"
+}
