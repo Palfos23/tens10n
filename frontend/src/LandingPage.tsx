@@ -8,13 +8,25 @@ interface Star {
 }
 
 interface LandingPageProps {
-    onStartGame: (numPlayers: number, numQuestions: number) => void;
+    onStartGame: (numPlayers: number, numQuestions: number, category: string) => void;
 }
+
+const categories = [
+    "Tilfeldig (alle kategorier)",
+    "Geografi",
+    "Historie",
+    "Sport",
+    "Underholdning",
+    "Vitenskap",
+    "Teknologi",
+    "Kultur"
+];
 
 const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
     const [open, setOpen] = useState(false);
     const [numPlayers, setNumPlayers] = useState("2");
     const [numQuestions, setNumQuestions] = useState("5");
+    const [category, setCategory] = useState(categories[0]);
     const [stars, setStars] = useState<Star[]>([]);
 
     useEffect(() => {
@@ -25,6 +37,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
         }));
         setStars(starArray);
     }, []);
+
+    const handleStart = () => {
+        onStartGame(parseInt(numPlayers, 10), parseInt(numQuestions, 10), category);
+        setOpen(false);
+    };
 
     return (
         <div className="landing-container">
@@ -54,7 +71,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                         <h2>Opprett Spill</h2>
 
                         <div className="form-group">
-                            <label>Antall Spillere</label>
+                            <label>👥 Antall Spillere</label>
                             <select
                                 value={numPlayers}
                                 onChange={(e) => setNumPlayers(e.target.value)}
@@ -68,7 +85,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                         </div>
 
                         <div className="form-group">
-                            <label>Antall Spørsmål</label>
+                            <label>❓ Antall Spørsmål</label>
                             <select
                                 value={numQuestions}
                                 onChange={(e) => setNumQuestions(e.target.value)}
@@ -81,13 +98,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                             </select>
                         </div>
 
-                        <button
-                            className="start-btn"
-                            onClick={() =>
-                                onStartGame(parseInt(numPlayers, 10), parseInt(numQuestions, 10))
-                            }
-                        >
-                            Start Spill
+                        <div className="form-group">
+                            <label>🏷️ Kategori</label>
+                            <select
+                                value={category}
+                                onChange={(e) => setCategory(e.target.value)}
+                            >
+                                {categories.map((cat, i) => (
+                                    <option key={i} value={cat}>
+                                        {cat}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <button className="start-btn" onClick={handleStart}>
+                            🚀 Start Spill
                         </button>
                     </div>
                 </div>
