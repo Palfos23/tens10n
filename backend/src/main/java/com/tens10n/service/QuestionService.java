@@ -22,11 +22,19 @@ public class QuestionService {
     private final String QUESTIONS_PATH = "data/questions";
     private final String CATEGORIES_PATH = "data/categories";
 
-    public QuestionService(ObjectMapper mapper) throws Exception {
+    public QuestionService(ObjectMapper mapper) {
         this.mapper = mapper;
-        loadAllQuestions();
-        loadAllCategories();
+
+        try {
+            loadAllQuestions();
+            loadAllCategories();
+            System.out.println("✅ QuestionService initialisert OK");
+        } catch (Exception e) {
+            System.err.println("⚠️ Kunne ikke laste spørsmål/kategorier: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 
     // 🔹 Laster inn alle spørsmål fra ressursmappen
     private void loadAllQuestions() throws IOException {
