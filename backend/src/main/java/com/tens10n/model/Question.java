@@ -7,6 +7,7 @@ public class Question {
     private String questionId;
     private String title;
     private int numTensionAnswers;
+    private String mainCategory;
     private Map<String, String> answers;
     private Map<String, String> tensionAnswers;
 
@@ -22,6 +23,9 @@ public class Question {
 
     public int getNumTensionAnswers() { return numTensionAnswers; }
     public void setNumTensionAnswers(int numTensionAnswers) { this.numTensionAnswers = numTensionAnswers; }
+
+    public String getMainCategory() { return mainCategory; }
+    public void setMainCategory(String mainCategory) { this.mainCategory = mainCategory; }
 
     public Map<String, String> getAnswers() { return answers; }
     public void setAnswers(Map<String, String> answers) { this.answers = answers; }

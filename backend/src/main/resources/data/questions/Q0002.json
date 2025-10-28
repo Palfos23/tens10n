@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0002",
+  "title": "Største byer som starter med bokstaven \"B\"",
+  "numTensionAnswers": 3,
+  "answers": {
+    "1": "Beijing",
+    "2": "Bangalore",
+    "3": "Bangkok",
+    "4": "Bogota",
+    "5": "Baghdad",
+    "6": "Berlin",
+    "7": "Busan",
+    "8": "Buenos Aires",
+    "9": "Brasilia",
+    "10": "Bekasi"
+  },
+  "tensionAnswers": {
+    "11": "Bandung",
+    "12": "Belo Horizonte",
+    "13": "Baku",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "citiesStartingWithB",
+  "mainCategory": "Geografi"
+}

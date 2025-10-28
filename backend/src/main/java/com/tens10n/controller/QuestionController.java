@@ -22,9 +22,16 @@ public class QuestionController {
         return questionService.getAllQuestions();
     }
 
-    // Get 5 random questions
+    // Get random questions, optionally filtered by mainCategory
     @GetMapping("/random")
-    public List<Question> getRandomQuestions(@RequestParam(defaultValue = "5") int count) {
+    public List<Question> getRandomQuestions(
+            @RequestParam(defaultValue = "5") int count,
+            @RequestParam(required = false) String category) {
+
+        if (category != null && !category.isBlank()) {
+            return questionService.getRandomQuestionsByMainCategory(category, count);
+        }
+
         return questionService.getRandomQuestions(count);
     }
 

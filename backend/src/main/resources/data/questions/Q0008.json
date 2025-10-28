@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0008",
+  "title": "Vertskapsbyer i VM i fotball 2006 i alfabetisk rekkefølge",
+  "numTensionAnswers": 2,
+  "answers": {
+    "1": "Berlin",
+    "2": "Dortmund",
+    "3": "Frankfurt",
+    "4": "Gelsenkirchen",
+    "5": "Hamburg",
+    "6": "Hannover",
+    "7": "Kaiserslautern",
+    "8": "Koln",
+    "9": "Leipzig",
+    "10": "Munchen"
+  },
+  "tensionAnswers": {
+    "11": "Nurnberg",
+    "12": "Stuttgart",
+    "13": "",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "citiesOfGermany",
+  "mainCategory": "Fotball"
+}

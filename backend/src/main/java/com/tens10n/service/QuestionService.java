@@ -2,11 +2,12 @@ package com.tens10n.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import com.tens10n.model.*;
+import com.tens10n.model.Question;
 
 import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,38 +15,55 @@ import java.util.stream.Collectors;
 public class QuestionService {
 
     private final ObjectMapper mapper;
-    private final List<Question> questions;
-    private final Map<String, List<String>> categoryAnswers;
-    private final File questionFile;
+    private final List<Question> questions = new ArrayList<>();
+    private final Map<String, List<String>> categoryAnswers = new HashMap<>();
+
+    // Disse peker på ressursmapper
+    private final Path questionsDir;
+    private final Path categoriesDir;
 
     public QuestionService(ObjectMapper mapper) throws Exception {
         this.mapper = mapper;
 
-        // Read from JSON file
-        InputStream is = getClass().getResourceAsStream("/quiz.json");
-        QuestionList questionList = mapper.readValue(is, QuestionList.class);
-        this.questions = questionList.getQuestions();
+        // Finn ressursbaner
+        this.questionsDir = getPathFromResources("/data/questions");
+        this.categoriesDir = getPathFromResources("/data/categories");
 
-        // Flatten answersCategories list into a single map
-        if (questionList.getAnswersCategories() != null && !questionList.getAnswersCategories().isEmpty()) {
-            Map<String, List<String>> raw = questionList.getAnswersCategories().get(0);
-            this.categoryAnswers = new HashMap<>();
-            for (Map.Entry<String, List<String>> entry : raw.entrySet()) {
-                this.categoryAnswers.put(entry.getKey().toLowerCase(), entry.getValue());
+        loadAllQuestions();
+        loadAllCategories();
+    }
+
+    // 🔹 Laster inn alle spørsmål fra mappen
+    private void loadAllQuestions() throws IOException {
+        if (!Files.exists(questionsDir)) return;
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(questionsDir, "*.json")) {
+            for (Path path : stream) {
+                Question q = mapper.readValue(path.toFile(), Question.class);
+                questions.add(q);
             }
-        } else {
-            this.categoryAnswers = new HashMap<>();
         }
-
-
-        // Locate file path for saving updates
-        this.questionFile = Paths.get("src/main/resources/quiz.json").toFile();
     }
 
+    // 🔹 Laster inn alle kategorier (hver fil = én liste)
+    private void loadAllCategories() throws IOException {
+        if (!Files.exists(categoriesDir)) return;
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(categoriesDir, "*.json")) {
+            for (Path path : stream) {
+                String categoryName = stripExtension(path.getFileName().toString()).toLowerCase();
+                List<String> items = Arrays.asList(mapper.readValue(path.toFile(), String[].class));
+                categoryAnswers.put(categoryName, items);
+            }
+        }
+    }
+
+    // 🔹 Henter alle spørsmål
     public List<Question> getAllQuestions() {
-        return questions;
+        return new ArrayList<>(questions);
     }
 
+    // 🔹 Henter spørsmål etter ID
     public Question getQuestionById(String id) {
         return questions.stream()
                 .filter(q -> q.getQuestionId().equalsIgnoreCase(id))
@@ -53,6 +71,7 @@ public class QuestionService {
                 .orElse(null);
     }
 
+    // 🔹 Henter tilfeldige spørsmål
     public List<Question> getRandomQuestions(int count) {
         List<Question> shuffled = new ArrayList<>(questions);
         Collections.shuffle(shuffled);
@@ -61,34 +80,69 @@ public class QuestionService {
                 .collect(Collectors.toList());
     }
 
-    public Question addQuestion(Question newQuestion) throws Exception {
+    // 🔹 Legger til nytt spørsmål (og lagrer som ny fil)
+    public Question addQuestion(Question newQuestion) throws IOException {
         questions.add(newQuestion);
-        saveToFile();
+        saveQuestionToFile(newQuestion);
         return newQuestion;
     }
 
-    public Question updateQuestion(String id, Question updatedQuestion) throws Exception {
+    // 🔹 Oppdaterer eksisterende spørsmål
+    public Question updateQuestion(String id, Question updatedQuestion) throws IOException {
         for (int i = 0; i < questions.size(); i++) {
             if (questions.get(i).getQuestionId().equalsIgnoreCase(id)) {
                 questions.set(i, updatedQuestion);
-                saveToFile();
+                saveQuestionToFile(updatedQuestion);
                 return updatedQuestion;
             }
         }
         return null;
     }
 
+    // 🔹 Henter liste over svar for en gitt kategori
     public List<String> getAnswersByCategory(String category) {
         if (category == null) return Collections.emptyList();
-
-        String normalized = category.toLowerCase().trim();
-        return categoryAnswers.getOrDefault(normalized, Collections.emptyList());
+        return categoryAnswers.getOrDefault(category.toLowerCase().trim(), Collections.emptyList());
     }
 
-    private void saveToFile() throws Exception {
-        QuestionList updatedList = new QuestionList();
-        updatedList.setQuestions(questions);
-        updatedList.setAnswersCategories(Collections.singletonList(categoryAnswers));
-        mapper.writerWithDefaultPrettyPrinter().writeValue(questionFile, updatedList);
+    public List<Question> getRandomQuestionsByMainCategory(String mainCategory, int count) {
+        if (mainCategory == null || mainCategory.isBlank()) {
+            return getRandomQuestions(count);
+        }
+
+        List<Question> filtered = questions.stream()
+                .filter(q -> q.getMainCategory() != null
+                        && q.getMainCategory().equalsIgnoreCase(mainCategory))
+                .collect(Collectors.toList());
+
+        Collections.shuffle(filtered);
+        return filtered.stream()
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    // 🔹 Lagrer et spørsmål tilbake til sin egen fil
+    private void saveQuestionToFile(Question question) throws IOException {
+        if (!Files.exists(questionsDir)) {
+            Files.createDirectories(questionsDir);
+        }
+
+        Path filePath = questionsDir.resolve(question.getQuestionId() + ".json");
+        mapper.writerWithDefaultPrettyPrinter().writeValue(filePath.toFile(), question);
+    }
+
+    // 🔹 Hjelpemetode for å finne resource-path (fungerer i JAR og lokalt)
+    private Path getPathFromResources(String resource) throws URISyntaxException, IOException {
+        var uri = getClass().getResource(resource);
+        if (uri == null) {
+            // Hvis ikke finnes (f.eks. første gang), lag mappen under src/main/resources manuelt
+            return Paths.get("src/main/resources" + resource);
+        }
+        return Paths.get(uri.toURI());
+    }
+
+    private String stripExtension(String filename) {
+        int idx = filename.lastIndexOf('.');
+        return (idx > 0) ? filename.substring(0, idx) : filename;
     }
 }

@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0007",
+  "title": "Mest solgte bilmerker i Norge i 2024",
+  "numTensionAnswers": 4,
+  "answers": {
+    "1": "Tesla",
+    "2": "Volkswagen",
+    "3": "Toyota",
+    "4": "Volvo",
+    "5": "BMW",
+    "6": "Skoda",
+    "7": "Hyundai",
+    "8": "Audi",
+    "9": "Nissan",
+    "10": "MG"
+  },
+  "tensionAnswers": {
+    "11": "Mercedes-Benz",
+    "12": "Ford",
+    "13": "BYD",
+    "14": "Polestar",
+    "15": ""
+  },
+  "answersCategory": "cars",
+  "mainCategory": "Diverse"
+}
