@@ -79,7 +79,7 @@ export default function GameCenter({
     useEffect(() => {
         if (!revealed) return;
         if (revealIndex < allAnswersList.length) {
-            const delay = 1600 + Math.random() * 600;
+            const delay = 1100;
             const timer = setTimeout(() => {
                 const next = revealIndex + 1;
                 setRevealIndex(next);
