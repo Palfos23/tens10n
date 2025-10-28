@@ -40,13 +40,16 @@ public class QuestionController {
         return questionService.getQuestionById(id);
     }
 
+    // 🔹 Bruker addOrUpdateQuestion i stedet for addQuestion
     @PostMapping
     public Question addQuestion(@RequestBody Question question) throws Exception {
-        return questionService.addQuestion(question);
+        return questionService.addOrUpdateQuestion(question);
     }
 
+    // 🔹 Bruker samme metode, men setter ID manuelt
     @PutMapping("/{id}")
     public Question updateQuestion(@PathVariable String id, @RequestBody Question question) throws Exception {
-        return questionService.updateQuestion(id, question);
+        question.setQuestionId(id);
+        return questionService.addOrUpdateQuestion(question);
     }
 }
