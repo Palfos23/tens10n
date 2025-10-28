@@ -27,34 +27,42 @@ public class QuestionService {
         try {
             loadAllQuestions();
             loadAllCategories();
-            System.out.println("✅ QuestionService initialisert med " + questions.size() + " spørsmål og " + categoryAnswers.size() + " kategorier.");
+            System.out.println("✅ QuestionService initialisert med "
+                    + questions.size() + " spørsmål og "
+                    + categoryAnswers.size() + " kategorier.");
         } catch (Exception e) {
             System.err.println("⚠️ Kunne ikke laste datafiler: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // 🔹 Laster spørsmål
+    // 🔹 Laster spørsmål (fra ressurser eller JAR)
     private void loadAllQuestions() throws IOException {
         List<String> fileNames = listResourceFiles(QUESTIONS_PATH);
         for (String file : fileNames) {
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(QUESTIONS_PATH + "/" + file)) {
+            try (InputStream is =
+                         getClass().getClassLoader().getResourceAsStream(QUESTIONS_PATH + "/" + file)) {
                 if (is == null) continue;
                 Question q = mapper.readValue(is, Question.class);
                 questions.add(q);
+            } catch (Exception e) {
+                System.err.println("⚠️ Kunne ikke lese spørsmål: " + file + " → " + e.getMessage());
             }
         }
     }
 
-    // 🔹 Laster kategorier
+    // 🔹 Laster kategorier (fra ressurser eller JAR)
     private void loadAllCategories() throws IOException {
         List<String> fileNames = listResourceFiles(CATEGORIES_PATH);
         for (String file : fileNames) {
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(CATEGORIES_PATH + "/" + file)) {
+            try (InputStream is =
+                         getClass().getClassLoader().getResourceAsStream(CATEGORIES_PATH + "/" + file)) {
                 if (is == null) continue;
                 String name = stripExtension(file).toLowerCase();
                 List<String> items = Arrays.asList(mapper.readValue(is, String[].class));
                 categoryAnswers.put(name, items);
+            } catch (Exception e) {
+                System.err.println("⚠️ Kunne ikke lese kategori: " + file + " → " + e.getMessage());
             }
         }
     }
@@ -64,6 +72,7 @@ public class QuestionService {
         return new ArrayList<>(questions);
     }
 
+    // 🔹 Hent spørsmål etter ID
     public Question getQuestionById(String id) {
         return questions.stream()
                 .filter(q -> q.getQuestionId().equalsIgnoreCase(id))
@@ -71,34 +80,52 @@ public class QuestionService {
                 .orElse(null);
     }
 
+    // 🔹 Tilfeldige spørsmål
     public List<Question> getRandomQuestions(int count) {
         List<Question> shuffled = new ArrayList<>(questions);
         Collections.shuffle(shuffled);
         return shuffled.stream().limit(count).collect(Collectors.toList());
     }
 
+    // 🔹 Tilfeldige spørsmål fra hovedkategori
     public List<Question> getRandomQuestionsByMainCategory(String mainCategory, int count) {
         if (mainCategory == null || mainCategory.isBlank()) {
             return getRandomQuestions(count);
         }
+
         List<Question> filtered = questions.stream()
                 .filter(q -> q.getMainCategory() != null &&
                         q.getMainCategory().equalsIgnoreCase(mainCategory))
                 .collect(Collectors.toList());
+
         Collections.shuffle(filtered);
         return filtered.stream().limit(count).collect(Collectors.toList());
     }
 
+    // 🔹 Hent svar for kategori
     public List<String> getAnswersByCategory(String category) {
         if (category == null) return Collections.emptyList();
         return categoryAnswers.getOrDefault(category.toLowerCase().trim(), Collections.emptyList());
     }
 
-    // 🔹 Les liste over filer inne i ressursmappen, fungerer både lokalt og i JAR
+    // 🔹 Legg til eller oppdater et spørsmål (kun i minnet)
+    public Question addOrUpdateQuestion(Question question) {
+        if (question == null || question.getQuestionId() == null || question.getQuestionId().isBlank()) {
+            throw new IllegalArgumentException("Question ID kan ikke være tomt");
+        }
+
+        questions.removeIf(q -> q.getQuestionId().equalsIgnoreCase(question.getQuestionId()));
+        questions.add(question);
+
+        System.out.println("💾 Spørsmål lagret/oppdatert: " + question.getQuestionId());
+        return question;
+    }
+
+    // 🔹 Finn alle filer i ressursmappen (fungerer både lokalt og i JAR)
     private List<String> listResourceFiles(String path) throws IOException {
         List<String> result = new ArrayList<>();
 
-        // Hvis vi kjører fra IDE (ikke JAR)
+        // Kjører fra IDE (ikke JAR)
         var url = getClass().getClassLoader().getResource(path);
         if (url != null && url.getProtocol().equals("file")) {
             var dir = new java.io.File(url.getPath());
@@ -109,7 +136,7 @@ public class QuestionService {
             return result;
         }
 
-        // Hvis vi kjører fra JAR
+        // Kjører fra JAR
         var jarPath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
         try (JarFile jar = new JarFile(jarPath)) {
             jar.stream()
