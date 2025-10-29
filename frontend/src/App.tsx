@@ -14,12 +14,12 @@ export default function App() {
     const [playerNames, setPlayerNames] = useState<string[]>([]);
     const [finalScores, setFinalScores] = useState<Record<string, number>>({});
     const [numQuestions, setNumQuestions] = useState(5);
-    const [category, setCategory] = useState("Tilfeldig (alle kategorier)");
+    //const [category, setCategory] = useState("Tilfeldig (alle kategorier)");
 
-    const handleCreateGame = (p: number, q: number, c: string) => {
+    const handleCreateGame = (p: number, q: number/*, c: string*/) => {
         setNumPlayers(p);
         setNumQuestions(q);
-        setCategory(c);
+        //setCategory(c);
         setStage("setup");
     };
 
