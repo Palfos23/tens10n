@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { QuestionView } from "./types";
-import { fetchPossibleAnswers } from "./api";
 import StarBackground from "./StarBackground";
+import AnswerModal from "./AnswerModal";
 
 interface GameCenterProps {
     questions: QuestionView[];
@@ -32,22 +32,25 @@ export default function GameCenter({
     const [pendingScores, setPendingScores] = useState<Record<string, number>>({});
     const [revealIndex, setRevealIndex] = useState(0);
     const [countdown, setCountdown] = useState<number | null>(null);
+    const [showIntro, setShowIntro] = useState(true);
+    const [introCountdown, setIntroCountdown] = useState(5);
 
     const question = questions[currentQuestionIndex];
 
-    // === Rotér spillerrekkefølge per spørsmål ===
+    // Roter spillerrekkefølgen
     const getRotatedPlayers = (players: string[], questionIndex: number): string[] => {
         const shift = questionIndex % players.length;
         return [...players.slice(shift), ...players.slice(0, shift)];
     };
-
     const rotatedPlayers = getRotatedPlayers(playerNames, currentQuestionIndex);
 
+    // Kombiner alle svar
     const allAnswersList = [
         ...question.answers.map((a) => ({ text: a.text, index: a.index, tension: false })),
         ...question.tensionAnswers.map((a) => ({ text: a.text, index: a.index, tension: true })),
     ];
 
+    // === Legg til svar ===
     const handleAnswerSubmit = (answer: string) => {
         if (!answer.trim()) return;
         const newAnswers = [
@@ -58,6 +61,7 @@ export default function GameCenter({
         setCurrentPlayer((p) => (p + 1 < rotatedPlayers.length ? p + 1 : 0));
     };
 
+    // === Beregn score og reveal ===
     const handleReveal = () => {
         const scoredAnswers = answers.map((a) => {
             const found = allAnswersList.find(
@@ -85,7 +89,7 @@ export default function GameCenter({
         setRevealIndex(0);
     };
 
-    // === AUTO-REVEAL COUNTDOWN ===
+    // === Auto-reveal countdown ===
     useEffect(() => {
         if (answers.length === rotatedPlayers.length && !revealed) {
             setCountdown(3);
@@ -102,7 +106,7 @@ export default function GameCenter({
         }
     }, [answers, revealed, rotatedPlayers.length]);
 
-    // === REVEAL ANIMATION ===
+    // === Reveal animasjon ===
     useEffect(() => {
         if (!revealed) return;
         if (revealIndex < allAnswersList.length) {
@@ -128,6 +132,21 @@ export default function GameCenter({
         }
     }, [revealed, revealIndex, allAnswersList, answers, pendingScores, scores]);
 
+    // === Intro mellom spørsmål ===
+    useEffect(() => {
+        setShowIntro(true);
+        setIntroCountdown(5);
+        const timer = setInterval(() => {
+            setIntroCountdown((c) => {
+                if (c > 1) return c - 1;
+                clearInterval(timer);
+                setShowIntro(false);
+                return 0;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [currentQuestionIndex]);
+
     const handleNextQuestion = () => {
         if (currentQuestionIndex + 1 < questions.length) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -143,6 +162,7 @@ export default function GameCenter({
 
     const allAnswered = answers.length === rotatedPlayers.length;
 
+    // Split spillere for layout
     const splitPlayers = (players: string[]): [string[], string[]] => {
         const half = Math.ceil(players.length / 2);
         return [players.slice(0, half), players.slice(half)];
@@ -156,9 +176,8 @@ export default function GameCenter({
                 display: "flex",
                 flexDirection: "column",
                 color: "white",
-                overflowY: "auto",
-                overflowX: "hidden",
                 position: "relative",
+                overflow: "hidden",
             }}
         >
             <StarBackground />
@@ -171,19 +190,7 @@ export default function GameCenter({
                 <h1 style={{ fontSize: "2.6rem", maxWidth: "80%", margin: "0.5rem auto" }}>
                     {question.title}
                 </h1>
-                <p style={{ opacity: 0.7 }}>
-                    Antall "Tension svar": {question.tensionAnswers.length}
-                </p>
-                <p
-                    style={{
-                        fontSize: "1rem",
-                        opacity: 0.9,
-                        marginTop: "0.4rem",
-                        fontStyle: "italic",
-                    }}
-                >
-                    Først ut denne runden: <strong>{rotatedPlayers[0]}</strong>
-                </p>
+                <p style={{ opacity: 0.7 }}>Antall “Tension svar”: {question.tensionAnswers.length}</p>
             </header>
 
             {/* === MAIN AREA === */}
@@ -214,11 +221,8 @@ export default function GameCenter({
                                         .some((ans) => ans.text.toLowerCase() === (pa?.answer ?? "").toLowerCase());
                                 const allRevealed = revealIndex >= allAnswersList.length;
                                 const showRoundScore =
-                                    revealed &&
-                                    pa !== undefined &&
-                                    (theirAnswerRevealed || (!answerInList && allRevealed));
+                                    revealed && pa && (theirAnswerRevealed || (!answerInList && allRevealed));
 
-                                // Fremhev den som starter runden
                                 const isStarter = player === rotatedPlayers[0];
 
                                 return (
@@ -276,7 +280,7 @@ export default function GameCenter({
                         <>
                             <div>{renderPlayerList(leftPlayers)}</div>
 
-                            {/* CENTER TABLE */}
+                            {/* === TABLE === */}
                             <div
                                 style={{
                                     background: "rgba(255,255,255,0.1)",
@@ -293,7 +297,7 @@ export default function GameCenter({
                                         <th>#</th>
                                         <th>Svar</th>
                                         <th>Spiller</th>
-                                        <th>Poengsum</th>
+                                        <th>Poeng</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -324,9 +328,7 @@ export default function GameCenter({
                                                 <td>
                                                     {revealedNow && guessedBy.length > 0
                                                         ? guessedBy
-                                                            .map((g) =>
-                                                                g.score! > 0 ? `+${g.score}` : g.score
-                                                            )
+                                                            .map((g) => (g.score! > 0 ? `+${g.score}` : g.score))
                                                             .join(", ")
                                                         : ""}
                                                 </td>
@@ -343,25 +345,16 @@ export default function GameCenter({
                 })()}
             </main>
 
-            {/* === FOOTER (Countdown, Skip, Next) === */}
-            <footer
-                style={{
-                    textAlign: "center",
-                    padding: "2rem 0 3rem 0",
-                }}
-            >
+            {/* === FOOTER === */}
+            <footer style={{ textAlign: "center", padding: "2rem 0 3rem 0" }}>
                 {countdown !== null && !revealed && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}
-                        style={{
-                            fontSize: "2rem",
-                            fontWeight: "bold",
-                            marginTop: "1rem",
-                        }}
+                        style={{ fontSize: "2rem", fontWeight: "bold", marginTop: "1rem" }}
                     >
-                        🔥 Revealing in {countdown}...
+                        Svarene kommer om {countdown}...
                     </motion.div>
                 )}
 
@@ -378,7 +371,7 @@ export default function GameCenter({
                             cursor: "pointer",
                         }}
                     >
-                        ⏩ Hopp over reveal
+                        Hopp over
                     </button>
                 )}
 
@@ -397,210 +390,55 @@ export default function GameCenter({
                             marginTop: "1rem",
                         }}
                     >
-                        {currentQuestionIndex + 1 < questions.length
-                            ? "Neste Spørsmål"
-                            : "Fullfør Spill"}
+                        {currentQuestionIndex + 1 < questions.length ? "Neste Spørsmål" : "Fullfør Spill"}
                     </button>
                 )}
             </footer>
 
-            {/* === FLOATING ANSWER MODAL === */}
-            {!revealed && !allAnswered && (
-                <div
+            {/* === INTRO === */}
+            {showIntro && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4 }}
                     style={{
                         position: "fixed",
-                        top: 0,
-                        left: 0,
-                        width: "100vw",
-                        height: "100vh",
-                        background: "rgba(0, 0, 0, 0.15)",
+                        inset: 0,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        flexDirection: "column",
+                        color: "white",
                         zIndex: 999,
+                        backdropFilter: "blur(4px)",
+                        background: "rgba(0,0,0,0.9)",
                     }}
                 >
-                    <div
-                        style={{
-                            background: "rgba(10, 10, 10, 0.8)",
-                            border: "1px solid rgba(255,255,255,0.15)",
-                            borderRadius: "16px",
-                            padding: "2rem 2.5rem",
-                            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-                            width: "min(500px, 90%)",
-                            textAlign: "center",
-                            color: "white",
-                            backdropFilter: "blur(8px)",
-                        }}
-                    >
-                        <h3
-                            style={{
-                                marginBottom: "1rem",
-                                fontWeight: 600,
-                                fontSize: "1.4rem",
-                                color: "white",
-                            }}
-                        >
-                            {rotatedPlayers[currentPlayer]}, din tur
-                        </h3>
+                    <h1 style={{ fontSize: "2.6rem", textShadow: "0 0 20px #6366f1" }}>
+                        {question.title}
+                    </h1>
+                    <p style={{ fontSize: "1.2rem", opacity: 0.9, marginTop: "1rem" }}>
+                        Først ut: <strong>{rotatedPlayers[0]}</strong>
+                    </p>
+                    <p style={{ marginTop: "2rem", fontSize: "1.2rem", color: "#a5b4fc" }}>
+                        Runden starter om {introCountdown} sek…
+                    </p>
+                </motion.div>
+            )}
 
-                        <p
-                            style={{
-                                fontSize: "1rem",
-                                opacity: 0.9,
-                                marginBottom: "1.2rem",
-                                fontStyle: "italic",
-                            }}
-                        >
-                            {question.title}
-                        </p>
-
-                        <AnswerInput
-                            onSubmit={handleAnswerSubmit}
-                            category={question.answersCategory}
-                        />
-                    </div>
-                </div>
+            {/* === MODAL === */}
+            {!revealed && !allAnswered && !showIntro && (
+                <AnswerModal
+                    currentPlayer={rotatedPlayers[currentPlayer]}
+                    questionTitle={question.title}
+                    tensionAnswers={question.tensionAnswers.length}
+                    category={question.answersCategory}
+                    onSubmit={handleAnswerSubmit}
+                    answeredPlayers={answers.map((a) => a.player)}
+                    allPlayers={rotatedPlayers}
+                />
             )}
         </div>
     );
 }
-
-/* === Autocomplete Input (samme som før) === */
-const AnswerInput: React.FC<{ onSubmit: (answer: string) => void; category: string }> = ({
-                                                                                             onSubmit,
-                                                                                             category,
-                                                                                         }) => {
-    const [value, setValue] = useState("");
-    const [allOptions, setAllOptions] = useState<string[]>([]);
-    const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [validSelection, setValidSelection] = useState(false);
-    const cacheRef = React.useRef<Map<string, string[]>>(new Map());
-
-    useEffect(() => {
-        async function loadOptions() {
-            if (!category) return;
-            const key = category.toLowerCase();
-            if (cacheRef.current.has(key)) {
-                setAllOptions(cacheRef.current.get(key)!);
-                return;
-            }
-            try {
-                const options = await fetchPossibleAnswers(key);
-                setAllOptions(options);
-                cacheRef.current.set(key, options);
-            } catch (e) {
-                console.error("Failed to load possible answers:", e);
-            }
-        }
-        loadOptions();
-    }, [category]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value;
-        setValue(newValue);
-        setValidSelection(false);
-        if (newValue.length >= 3) {
-            const filtered = allOptions
-                .filter((opt) => opt.toLowerCase().includes(newValue.toLowerCase()))
-                .slice(0, 12);
-            setFilteredOptions(filtered);
-            setShowDropdown(true);
-        } else {
-            setFilteredOptions([]);
-            setShowDropdown(false);
-        }
-    };
-
-    const handleSelect = (selected: string) => {
-        setValue(selected);
-        setShowDropdown(false);
-        setValidSelection(true);
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (validSelection) {
-            onSubmit(value);
-            setValue("");
-            setValidSelection(false);
-        } else {
-            alert("Please select a valid answer from the list.");
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} style={{ position: "relative" }}>
-            <input
-                type="text"
-                placeholder="Svar her…"
-                value={value}
-                onChange={handleChange}
-                style={{
-                    width: "100%",
-                    padding: "0.8rem",
-                    fontSize: "1.1rem",
-                    borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.3)",
-                    background: "rgba(255,255,255,0.1)",
-                    color: "white",
-                    textAlign: "center",
-                }}
-            />
-            {showDropdown && (
-                <ul
-                    style={{
-                        listStyle: "none",
-                        margin: 0,
-                        padding: 0,
-                        position: "absolute",
-                        bottom: "110%",
-                        left: 0,
-                        width: "100%",
-                        background: "rgba(20,20,20,0.98)",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        borderRadius: "10px 10px 0 0",
-                        maxHeight: "220px",
-                        overflowY: "auto",
-                        zIndex: 9999,
-                    }}
-                >
-                    {(filteredOptions.length > 0 ? filteredOptions : ["— No matches —"]).map(
-                        (opt) => (
-                            <li
-                                key={opt}
-                                onClick={() => handleSelect(opt)}
-                                style={{
-                                    padding: "0.65rem 1rem",
-                                    cursor: "pointer",
-                                    textAlign: "center",
-                                    color: "white",
-                                    opacity: opt === "— No matches —" ? 0.7 : 1,
-                                    fontStyle: opt === "— No matches —" ? "italic" : "normal",
-                                }}
-                            >
-                                {opt}
-                            </li>
-                        )
-                    )}
-                </ul>
-            )}
-            <button
-                type="submit"
-                style={{
-                    marginTop: "1rem",
-                    padding: "0.8rem 1.6rem",
-                    borderRadius: 10,
-                    border: "none",
-                    background: validSelection ? "#4f46e5" : "gray",
-                    color: "white",
-                    fontWeight: "bold",
-                    cursor: validSelection ? "pointer" : "not-allowed",
-                }}
-            >
-                Send inn
-            </button>
-        </form>
-    );
-};

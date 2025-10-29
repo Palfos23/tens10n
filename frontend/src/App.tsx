@@ -5,35 +5,47 @@ import LandingPage from "./LandingPage";
 import PlayerSetup from "./PlayerSetup";
 import GameCenter from "./GameCenter";
 import GameOver from "./GameOver";
+import LoadingScreen from "./LoadingScreen";
 
 export default function App() {
     const [questions, setQuestions] = useState<QuestionView[]>([]);
     const [numPlayers, setNumPlayers] = useState(2);
-    const [stage, setStage] = useState<"landing" | "setup" | "game" | "done">("landing");
+    const [stage, setStage] = useState<"landing" | "setup" | "loading" | "game" | "done">("landing");
     const [playerNames, setPlayerNames] = useState<string[]>([]);
     const [finalScores, setFinalScores] = useState<Record<string, number>>({});
+    const [numQuestions, setNumQuestions] = useState(5);
+    const [category, setCategory] = useState("Tilfeldig (alle kategorier)");
 
-    // ✅ Accept both player count and question count
-    const handleCreateGame = async (p: number, q: number) => {
+    const handleCreateGame = (p: number, q: number, c: string) => {
         setNumPlayers(p);
+        setNumQuestions(q);
+        setCategory(c);
         setStage("setup");
+    };
+
+    const handlePlayerSetupDone = async (names: string[]) => {
+        setPlayerNames(names);
+        setStage("loading"); // 👈 Vis loading screen
+
         try {
-            const data = await fetchRandomQuestions(q); // ✅ use chosen number of questions
+            const data = await fetchRandomQuestions(numQuestions);
             setQuestions(data);
+
+            // Simulerer litt lastetid for smooth overgang
+            setTimeout(() => {
+                setStage("game");
+            }, 4500);
         } catch (e: any) {
             alert(e?.message ?? "Failed to load questions.");
-            setQuestions([]);
+            setStage("landing");
         }
     };
 
-
-    // ✅ When the game ends, store scores
     const handleGameOver = (scores: Record<string, number>) => {
         setFinalScores(scores);
         setStage("done");
     };
 
-    // ✅ Reset to the start
     const resetGame = () => {
         setQuestions([]);
         setPlayerNames([]);
@@ -42,23 +54,21 @@ export default function App() {
     };
 
     // ---- Stage rendering ----
-    if (stage === "landing") {
-        return <LandingPage onStartGame={handleCreateGame} />;
-    }
+    if (stage === "landing") return <LandingPage onStartGame={handleCreateGame} />;
 
-    if (stage === "setup") {
+    if (stage === "setup")
+        return <PlayerSetup numPlayers={numPlayers} onStart={handlePlayerSetupDone} />;
+
+    if (stage === "loading")
         return (
-            <PlayerSetup
-                numPlayers={numPlayers}
-                onStart={(names) => {
-                    setPlayerNames(names);
+            <LoadingScreen
+                onComplete={() => {
                     setStage("game");
                 }}
             />
         );
-    }
 
-    if (stage === "game") {
+    if (stage === "game")
         return (
             <GameCenter
                 questions={questions}
@@ -66,11 +76,8 @@ export default function App() {
                 onGameOver={handleGameOver}
             />
         );
-    }
 
-    if (stage === "done") {
-        return <GameOver scores={finalScores} onPlayAgain={resetGame} />;
-    }
+    if (stage === "done") return <GameOver scores={finalScores} onPlayAgain={resetGame} />;
 
     return null;
 }

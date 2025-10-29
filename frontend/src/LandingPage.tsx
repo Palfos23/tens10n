@@ -116,7 +116,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                         </div>
 
                         <button className="start-btn" onClick={handleStart}>
-                            🚀 Start Spill
+                            🚀 Opprett Spill
                         </button>
                     </div>
                 </div>
