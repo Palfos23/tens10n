@@ -4,9 +4,14 @@ import type { QuestionView } from "./types";
 import StarBackground from "./StarBackground";
 import AnswerModal from "./AnswerModal";
 
+interface PlayerInfo {
+    name: string;
+    color: string;
+}
+
 interface GameCenterProps {
     questions: QuestionView[];
-    playerNames: string[];
+    players: PlayerInfo[];
     onGameOver: (scores: Record<string, number>) => void;
 }
 
@@ -17,17 +22,13 @@ interface PlayerAnswer {
     index?: number;
 }
 
-export default function GameCenter({
-                                       questions,
-                                       playerNames,
-                                       onGameOver,
-                                   }: GameCenterProps) {
+export default function GameCenter({ questions, players, onGameOver }: GameCenterProps) {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<PlayerAnswer[]>([]);
     const [currentPlayer, setCurrentPlayer] = useState(0);
     const [revealed, setRevealed] = useState(false);
     const [scores, setScores] = useState<Record<string, number>>(
-        Object.fromEntries(playerNames.map((p) => [p, 0]))
+        Object.fromEntries(players.map((p) => [p.name, 0]))
     );
     const [pendingScores, setPendingScores] = useState<Record<string, number>>({});
     const [revealIndex, setRevealIndex] = useState(0);
@@ -36,6 +37,7 @@ export default function GameCenter({
     const [introCountdown, setIntroCountdown] = useState(5);
 
     const question = questions[currentQuestionIndex];
+    const playerNames = players.map((p) => p.name);
 
     // === Roter spillerrekkefølge kun for turrekkefølge ===
     const getRotatedPlayers = (players: string[], questionIndex: number): string[] => {
@@ -78,7 +80,6 @@ export default function GameCenter({
             return { ...a, score: scoreDelta, index: idx };
         });
 
-        // 🚀 Oppdater riktig spiller (ikke rotert rekkefølge)
         const newTotals = { ...scores };
         scoredAnswers.forEach((a) => {
             const playerKey = playerNames.find((p) => p === a.player);
@@ -118,14 +119,12 @@ export default function GameCenter({
                 const next = revealIndex + 1;
                 setRevealIndex(next);
 
-                // Når alt er avslørt, oppdater poeng én gang
                 if (next >= allAnswersList.length) {
                     setScores(pendingScores);
                 }
             }, delay);
             return () => clearTimeout(timer);
         } else if (revealIndex >= allAnswersList.length) {
-            // Fallback: sørg for at vi alltid setter siste poeng
             setScores(pendingScores);
         }
     }, [revealed, revealIndex, allAnswersList, pendingScores]);
@@ -160,7 +159,6 @@ export default function GameCenter({
 
     const allAnswered = answers.length === rotatedPlayers.length;
 
-    // === Splitt spillerne for visning ===
     const splitPlayers = (players: string[]): [string[], string[]] => {
         const half = Math.ceil(players.length / 2);
         return [players.slice(0, half), players.slice(half)];
@@ -210,6 +208,7 @@ export default function GameCenter({
                     const renderPlayerList = (sidePlayers: string[]) => (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
                             {sidePlayers.map((player) => {
+                                const playerObj = players.find((p) => p.name === player)!;
                                 const pa = answers.find((a) => a.player === player);
                                 const roundScore = pa?.score ?? 0;
                                 const answerInList = pa?.index !== undefined;
@@ -225,32 +224,32 @@ export default function GameCenter({
                                 const allRevealed = revealIndex >= allAnswersList.length;
                                 const showRoundScore =
                                     revealed && pa && (theirAnswerRevealed || (!answerInList && allRevealed));
-
-                                const isCurrentTurn = player === rotatedPlayers[currentPlayer];
-
                                 return (
                                     <div
                                         key={player}
                                         style={{
-                                            background: isCurrentTurn
-                                                ? "rgba(79,70,229,0.6)"
-                                                : "rgba(255,255,255,0.1)",
-                                            borderRadius: 10,
+                                            background: playerObj.color,
+                                            borderRadius: 12,
                                             padding: "0.6rem 1rem",
                                             display: "flex",
                                             justifyContent: "space-between",
                                             alignItems: "center",
-                                            boxShadow: isCurrentTurn
-                                                ? "0 0 12px #6366f1"
-                                                : "0 0 6px rgba(0,0,0,0.3)",
-                                            minWidth: "220px",
+                                            boxShadow: `0 0 12px rgba(256,256,256,0.5)`,
+                                            minWidth: "240px",
                                             transition: "background 0.3s, box-shadow 0.3s",
                                         }}
                                     >
-                                        <div>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                alignItems: "flex-start",
+                                                gap: "0.2rem",
+                                            }}
+                                        >
                                             <strong>{player}</strong>
                                             <div style={{ fontSize: "0.9rem", opacity: 0.8 }}>
-                                                {pa ? pa.answer : "— venter på svar —"}
+                                                {pa ? pa.answer : "— venter —"}
                                             </div>
                                         </div>
                                         <div style={{ textAlign: "right" }}>
@@ -284,8 +283,7 @@ export default function GameCenter({
                     return (
                         <>
                             <div>{renderPlayerList(leftPlayers)}</div>
-
-                            {/* === SVARTABELL === */}
+                            {/* === TABLE === */}
                             <div
                                 style={{
                                     background: "rgba(255,255,255,0.1)",
@@ -349,7 +347,6 @@ export default function GameCenter({
                                     </tbody>
                                 </table>
                             </div>
-
                             <div>{renderPlayerList(rightPlayers)}</div>
                         </>
                     );
@@ -413,7 +410,6 @@ export default function GameCenter({
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }}
                     style={{
                         position: "fixed",
@@ -432,7 +428,10 @@ export default function GameCenter({
                         {question.title}
                     </h1>
                     <p style={{ fontSize: "1.2rem", opacity: 0.9, marginTop: "1rem" }}>
-                        Først ut: <strong>{rotatedPlayers[0]}</strong>
+                        Først ut:{" "}
+                        <strong>
+                            {players.find((p) => p.name === rotatedPlayers[0])?.name}{" "}
+                        </strong>
                     </p>
                     <p style={{ marginTop: "2rem", fontSize: "1.2rem", color: "#a5b4fc" }}>
                         Runden starter om {introCountdown} sek…

@@ -1,40 +1,53 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import StarBackground from "./StarBackground";
 import "./PlayerSetup.css";
 
 interface PlayerSetupProps {
     numPlayers: number;
-    onStart: (players: string[]) => void;
+    onStart: (players: { name: string; color: string }[]) => void;
 }
 
-const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
-    const [names, setNames] = useState<string[]>(Array(numPlayers).fill(""));
+const colors = [
+    "#4f46e5",
+    "#16a34a",
+    "#dc2626",
+    "#f59e0b",
+    "#0ea5e9",
+    "#9333ea",
+    "#f43f5e",
+    "#22d3ee",
+    "#84cc16",
+];
+
+export default function PlayerSetup({ numPlayers, onStart }: PlayerSetupProps) {
+    const [players, setPlayers] = useState(
+        Array.from({ length: numPlayers }, () => ({
+            name: "",
+            color: colors[Math.floor(Math.random() * colors.length)],
+        }))
+    );
     const [error, setError] = useState<string | null>(null);
 
-    const handleChange = (i: number, value: string) => {
-        const updated = [...names];
-        updated[i] = value;
-        setNames(updated);
-    };
+    const allNamed = players.every((p) => p.name.trim().length > 0);
 
-    const allNamed = names.every((n) => n.trim().length > 0);
-
-    const hasDuplicates = names
-        .map((n) => n.trim().toLowerCase())
+    const hasDuplicates = players
+        .map((p) => p.name.trim().toLowerCase())
         .filter((n) => n.length > 0)
-        .some((name, index, arr) => arr.indexOf(name) !== index);
+        .some((name, i, arr) => arr.indexOf(name) !== i);
 
     useEffect(() => {
-        if (hasDuplicates) {
-            setError("Flere spillere har samme navn – velg unike navn 🧩");
-        } else {
-            setError(null);
-        }
-    }, [hasDuplicates, names]);
+        setError(hasDuplicates ? "Flere spillere har samme navn 🧩" : null);
+    }, [hasDuplicates]);
+
+    const handleChange = (i: number, key: "name" | "color", value: string) => {
+        const updated = [...players];
+        updated[i] = { ...updated[i], [key]: value };
+        setPlayers(updated);
+    };
 
     const handleStart = () => {
-        if (hasDuplicates || !allNamed) return;
-        onStart(names);
+        if (!allNamed || hasDuplicates) return;
+        onStart(players);
     };
 
     return (
@@ -42,29 +55,41 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
             <StarBackground />
 
             <div className="player-setup-card">
-                <h2 className="player-setup-title">Skriv inn navn på spillere</h2>
+                <h2 className="player-setup-title">Tilpass spillerne dine 🎨</h2>
 
                 <div className="player-inputs">
-                    {names.map((name, i) => (
-                        <input
-                            key={i}
-                            type="text"
-                            placeholder={`Spiller ${i + 1}`}
-                            value={name}
-                            onChange={(e) => handleChange(i, e.target.value)}
-                            className={`player-input ${
-                                hasDuplicates ? "input-error" : ""
-                            }`}
-                        />
+                    {players.map((p, i) => (
+                        <div key={i} className="player-row">
+                            <input
+                                type="text"
+                                placeholder={`Spiller ${i + 1}`}
+                                value={p.name}
+                                onChange={(e) => handleChange(i, "name", e.target.value)}
+                                className="player-input"
+                            />
+
+                            <div className="color-wrapper">
+                                <label
+                                    htmlFor={`color-${i}`}
+                                    className="color-display"
+                                    style={{ backgroundColor: p.color }}
+                                ></label>
+                                <input
+                                    id={`color-${i}`}
+                                    type="color"
+                                    value={p.color}
+                                    onChange={(e) => handleChange(i, "color", e.target.value)}
+                                    className="color-picker"
+                                />
+                            </div>
+                        </div>
                     ))}
                 </div>
 
                 {error && <p className="error-text">{error}</p>}
 
                 <button
-                    className={`start-btn ${
-                        allNamed && !hasDuplicates ? "active" : "disabled"
-                    }`}
+                    className={`start-btn ${allNamed && !hasDuplicates ? "active" : "disabled"}`}
                     disabled={!allNamed || hasDuplicates}
                     onClick={handleStart}
                 >
@@ -73,6 +98,4 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ numPlayers, onStart }) => {
             </div>
         </div>
     );
-};
-
-export default PlayerSetup;
+}

@@ -7,24 +7,29 @@ import GameCenter from "./GameCenter";
 import GameOver from "./GameOver";
 import LoadingScreen from "./LoadingScreen";
 
+interface PlayerInfo {
+    name: string;
+    color: string;
+}
+
 export default function App() {
     const [questions, setQuestions] = useState<QuestionView[]>([]);
     const [numPlayers, setNumPlayers] = useState(2);
     const [stage, setStage] = useState<"landing" | "setup" | "loading" | "game" | "done">("landing");
-    const [playerNames, setPlayerNames] = useState<string[]>([]);
+    const [players, setPlayers] = useState<PlayerInfo[]>([]);
     const [finalScores, setFinalScores] = useState<Record<string, number>>({});
     const [numQuestions, setNumQuestions] = useState(5);
-    //const [category, setCategory] = useState("Tilfeldig (alle kategorier)");
 
-    const handleCreateGame = (p: number, q: number/*, c: string*/) => {
+    // === Opprett nytt spill ===
+    const handleCreateGame = (p: number, q: number) => {
         setNumPlayers(p);
         setNumQuestions(q);
-        //setCategory(c);
         setStage("setup");
     };
 
-    const handlePlayerSetupDone = async (names: string[]) => {
-        setPlayerNames(names);
+    // === Når spilleroppsett er ferdig ===
+    const handlePlayerSetupDone = async (playerList: PlayerInfo[]) => {
+        setPlayers(playerList);
         setStage("loading"); // 👈 Vis loading screen
 
         try {
@@ -36,24 +41,26 @@ export default function App() {
                 setStage("game");
             }, 4500);
         } catch (e: any) {
-            alert(e?.message ?? "Failed to load questions.");
+            alert(e?.message ?? "Kunne ikke laste spørsmål.");
             setStage("landing");
         }
     };
 
+    // === Når spillet er ferdig ===
     const handleGameOver = (scores: Record<string, number>) => {
         setFinalScores(scores);
         setStage("done");
     };
 
+    // === Nullstill spillet ===
     const resetGame = () => {
         setQuestions([]);
-        setPlayerNames([]);
+        setPlayers([]);
         setFinalScores({});
         setStage("landing");
     };
 
-    // ---- Stage rendering ----
+    // === Stage-visning ===
     if (stage === "landing") return <LandingPage onStartGame={handleCreateGame} />;
 
     if (stage === "setup")
@@ -72,7 +79,7 @@ export default function App() {
         return (
             <GameCenter
                 questions={questions}
-                playerNames={playerNames}
+                players={players}
                 onGameOver={handleGameOver}
             />
         );

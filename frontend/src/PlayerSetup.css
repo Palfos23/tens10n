@@ -10,7 +10,7 @@
     font-family: "Arial", sans-serif;
 }
 
-/* Kortet med glassmorphism og glow */
+/* Kort med glassmorphism */
 .player-setup-card {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
@@ -68,7 +68,7 @@
     align-items: center;
 }
 
-/* Input med fly-inn animasjon */
+/* Input-felt */
 .player-input {
     width: 80%;
     padding: 0.7rem 1rem;
@@ -91,16 +91,6 @@
         transform: translateY(0);
     }
 }
-
-/* Sekvensielle input-forsinkelser */
-.player-input:nth-child(1) { animation-delay: 0.2s; }
-.player-input:nth-child(2) { animation-delay: 0.35s; }
-.player-input:nth-child(3) { animation-delay: 0.5s; }
-.player-input:nth-child(4) { animation-delay: 0.65s; }
-.player-input:nth-child(5) { animation-delay: 0.8s; }
-.player-input:nth-child(6) { animation-delay: 0.95s; }
-.player-input:nth-child(7) { animation-delay: 1.1s; }
-.player-input:nth-child(8) { animation-delay: 1.25s; }
 
 .player-input::placeholder {
     color: rgba(255, 255, 255, 0.6);
@@ -172,7 +162,43 @@
     }
 }
 
-.input-error {
-    border-color: #ff5555 !important;
-    box-shadow: 0 0 10px rgba(255, 85, 85, 0.6) !important;
+.player-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+}
+
+/* === Ny fargevelger === */
+.color-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-display {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.color-display:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+/* Skjuler native color-input men gjør den klikkbar */
+.color-picker {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
 }
