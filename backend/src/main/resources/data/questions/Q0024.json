@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0024",
+  "title": "Land med høyest estimert levealder i Afrika",
+  "numTensionAnswers": 3,
+  "answers": {
+    "1": "Algerie",
+    "2": "Libya",
+    "3": "Tunisia",
+    "4": "Seychellene",
+    "5": "Mauritius",
+    "6": "Egypt",
+    "7": "Kapp Verde",
+    "8": "Marokkko",
+    "9": "Malawi",
+    "10": "Republikken Kongo"
+  },
+  "tensionAnswers": {
+    "11": "Togo",
+    "12": "Sør-Afrika",
+    "13": "Tanzania",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "countriesOfTheWorld",
+  "mainCategory": "Geografi"
+}

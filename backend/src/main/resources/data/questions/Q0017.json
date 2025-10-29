@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0017",
+  "title": "Største byer i Storbritannia etter innbyggertall",
+  "numTensionAnswers": 3,
+  "answers": {
+    "1": "London",
+    "2": "Birmingham",
+    "3": "Liverpool",
+    "4": "Nottingham",
+    "5": "Sheffield",
+    "6": "Bristol",
+    "7": "Glasgow",
+    "8": "Leicester",
+    "9": "Edinburgh",
+    "10": "Leeds"
+  },
+  "tensionAnswers": {
+    "11": "Cardiff",
+    "12": "Manchester",
+    "13": "Stoke-on-Trent",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "citiesOfUK",
+  "mainCategory": "Geografi"
+}

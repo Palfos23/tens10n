@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0021",
+  "title": "Største byer i Spania etter innbyggertall",
+  "numTensionAnswers": 3,
+  "answers": {
+    "1": "Madrid",
+    "2": "Barcelona",
+    "3": "Valencia",
+    "4": "Sevilla",
+    "5": "Zaragoza",
+    "6": "Málaga",
+    "7": "Las Palmas",
+    "8": "Bilbao",
+    "9": "Murcia",
+    "10": "Valladolid"
+  },
+  "tensionAnswers": {
+    "11": "Córdoba",
+    "12": "Palma de Mallorca",
+    "13": "Vigo",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "citiesOfSpain",
+  "mainCategory": "Geografi"
+}

@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0025",
+  "title": "Inkludert 2022, 3p for seier 1p for uavgjort, overall tabell gjennom tidene i VM i fotball for herrer",
+  "numTensionAnswers": 3,
+  "answers": {
+    "1": "Brasil",
+    "2": "Tyskland",
+    "3": "Argentina",
+    "4": "Italia",
+    "5": "Frankrike",
+    "6": "England",
+    "7": "Spania",
+    "8": "Nederland",
+    "9": "Uruguay",
+    "10": "Belgia"
+  },
+  "tensionAnswers": {
+    "11": "Sverige",
+    "12": "Russland",
+    "13": "Mexico",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "countriesOfTheWorld",
+  "mainCategory": "Fotball"
+}

@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0022",
+  "title": "Land i Nord- og Sør-Amerika med mest nedbør",
+  "numTensionAnswers": 4,
+  "answers": {
+    "1": "Colombia",
+    "2": "Panama",
+    "3": "Costa Rica",
+    "4": "Guyana",
+    "5": "Grenada",
+    "6": "Surinam",
+    "7": "Saint Lucia",
+    "8": "Nicaragua",
+    "9": "Ecuador",
+    "10": "Trinidad og Tobago"
+  },
+  "tensionAnswers": {
+    "11": "Dominica",
+    "12": "Jamaica",
+    "13": "Venezuela",
+    "14": "Guatemala",
+    "15": ""
+  },
+  "answersCategory": "countriesOfTheWorld",
+  "mainCategory": "Geografi"
+}

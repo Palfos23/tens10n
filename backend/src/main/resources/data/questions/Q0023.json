@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0023",
+  "title": "Land i verden med høyest målt temperatur gjennom tidene",
+  "numTensionAnswers": 4,
+  "answers": {
+    "1": "USA",
+    "2": "Israel",
+    "3": "Iran",
+    "4": "Kuwait",
+    "5": "Iraq",
+    "6": "Pakistan",
+    "7": "Kina",
+    "8": "Saudi Arabia",
+    "9": "De forente arabiske emirater",
+    "10": "Mexico"
+  },
+  "tensionAnswers": {
+    "11": "Oman",
+    "12": "Algerie",
+    "13": "Egypt",
+    "14": "India",
+    "15": ""
+  },
+  "answersCategory": "countriesOfTheWorld",
+  "mainCategory": "Geografi"
+}

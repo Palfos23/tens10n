@@ -1,0 +1,26 @@
+{
+  "questionId": "Q0016",
+  "title": "Land med høyeste laveste punkt",
+  "numTensionAnswers": 3,
+  "answers": {
+    "1": "Lesotho",
+    "2": "Rwanda",
+    "3": "Andorra",
+    "4": "Burundi",
+    "5": "Uganda",
+    "6": "Mongolia",
+    "7": "Botswana",
+    "8": "Kirgisistan",
+    "9": "Liechtenstein",
+    "10": "Armenia"
+  },
+  "tensionAnswers": {
+    "11": "Sør-Sudan",
+    "12": "Den sentralafrikanske republikk",
+    "13": "Zambia",
+    "14": "",
+    "15": ""
+  },
+  "answersCategory": "countriesOfTheWorld",
+  "mainCategory": "Geografi"
+}
