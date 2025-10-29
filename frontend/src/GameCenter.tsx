@@ -37,20 +37,20 @@ export default function GameCenter({
 
     const question = questions[currentQuestionIndex];
 
-    // Roter spillerrekkefølgen
+    // === Roter spillerrekkefølge kun for turrekkefølge ===
     const getRotatedPlayers = (players: string[], questionIndex: number): string[] => {
         const shift = questionIndex % players.length;
         return [...players.slice(shift), ...players.slice(0, shift)];
     };
     const rotatedPlayers = getRotatedPlayers(playerNames, currentQuestionIndex);
 
-    // Kombiner alle svar
+    // === Kombiner alle gyldige svar ===
     const allAnswersList = [
         ...question.answers.map((a) => ({ text: a.text, index: a.index, tension: false })),
         ...question.tensionAnswers.map((a) => ({ text: a.text, index: a.index, tension: true })),
     ];
 
-    // === Legg til svar ===
+    // === Legg til nytt svar ===
     const handleAnswerSubmit = (answer: string) => {
         if (!answer.trim()) return;
         const newAnswers = [
@@ -61,7 +61,7 @@ export default function GameCenter({
         setCurrentPlayer((p) => (p + 1 < rotatedPlayers.length ? p + 1 : 0));
     };
 
-    // === Beregn score og reveal ===
+    // === Poengberegning og reveal ===
     const handleReveal = () => {
         const scoredAnswers = answers.map((a) => {
             const found = allAnswersList.find(
@@ -78,9 +78,11 @@ export default function GameCenter({
             return { ...a, score: scoreDelta, index: idx };
         });
 
+        // 🚀 Oppdater riktig spiller (ikke rotert rekkefølge)
         const newTotals = { ...scores };
         scoredAnswers.forEach((a) => {
-            newTotals[a.player] += a.score ?? 0;
+            const playerKey = playerNames.find((p) => p === a.player);
+            if (playerKey) newTotals[playerKey] += a.score ?? 0;
         });
 
         setPendingScores(newTotals);
@@ -106,31 +108,27 @@ export default function GameCenter({
         }
     }, [answers, revealed, rotatedPlayers.length]);
 
-    // === Reveal animasjon ===
+    // === Reveal animasjon (fikset poengoppdatering) ===
     useEffect(() => {
         if (!revealed) return;
+
         if (revealIndex < allAnswersList.length) {
             const delay = 1100;
             const timer = setTimeout(() => {
                 const next = revealIndex + 1;
                 setRevealIndex(next);
 
-                const revealedAnswers = allAnswersList
-                    .slice(0, next)
-                    .map((a) => a.text.toLowerCase());
-                answers.forEach((a) => {
-                    const inList = a.index !== undefined;
-                    const wasRevealed =
-                        (inList && revealedAnswers.includes(a.answer.toLowerCase())) ||
-                        (!inList && next >= allAnswersList.length);
-                    if (wasRevealed && scores[a.player] !== pendingScores[a.player]) {
-                        setScores((s) => ({ ...s, [a.player]: pendingScores[a.player] }));
-                    }
-                });
+                // Når alt er avslørt, oppdater poeng én gang
+                if (next >= allAnswersList.length) {
+                    setScores(pendingScores);
+                }
             }, delay);
             return () => clearTimeout(timer);
+        } else if (revealIndex >= allAnswersList.length) {
+            // Fallback: sørg for at vi alltid setter siste poeng
+            setScores(pendingScores);
         }
-    }, [revealed, revealIndex, allAnswersList, answers, pendingScores, scores]);
+    }, [revealed, revealIndex, allAnswersList, pendingScores]);
 
     // === Intro mellom spørsmål ===
     useEffect(() => {
@@ -162,7 +160,7 @@ export default function GameCenter({
 
     const allAnswered = answers.length === rotatedPlayers.length;
 
-    // Split spillere for layout
+    // === Splitt spillerne for visning ===
     const splitPlayers = (players: string[]): [string[], string[]] => {
         const half = Math.ceil(players.length / 2);
         return [players.slice(0, half), players.slice(half)];
@@ -190,10 +188,12 @@ export default function GameCenter({
                 <h1 style={{ fontSize: "2.6rem", maxWidth: "80%", margin: "0.5rem auto" }}>
                     {question.title}
                 </h1>
-                <p style={{ opacity: 0.7 }}>Antall “Tension svar”: {question.tensionAnswers.length}</p>
+                <p style={{ opacity: 0.7 }}>
+                    Antall “Tension svar”: {question.tensionAnswers.length}
+                </p>
             </header>
 
-            {/* === MAIN AREA === */}
+            {/* === MAIN === */}
             <main
                 style={{
                     flex: 1,
@@ -205,7 +205,7 @@ export default function GameCenter({
                 }}
             >
                 {(() => {
-                    const [leftPlayers, rightPlayers] = splitPlayers(rotatedPlayers);
+                    const [leftPlayers, rightPlayers] = splitPlayers(playerNames);
 
                     const renderPlayerList = (sidePlayers: string[]) => (
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
@@ -218,28 +218,33 @@ export default function GameCenter({
                                     answerInList &&
                                     allAnswersList
                                         .slice(0, revealIndex)
-                                        .some((ans) => ans.text.toLowerCase() === (pa?.answer ?? "").toLowerCase());
+                                        .some(
+                                            (ans) =>
+                                                ans.text.toLowerCase() === (pa?.answer ?? "").toLowerCase()
+                                        );
                                 const allRevealed = revealIndex >= allAnswersList.length;
                                 const showRoundScore =
                                     revealed && pa && (theirAnswerRevealed || (!answerInList && allRevealed));
 
-                                const isStarter = player === rotatedPlayers[0];
+                                const isCurrentTurn = player === rotatedPlayers[currentPlayer];
 
                                 return (
                                     <div
                                         key={player}
                                         style={{
-                                            background: isStarter
-                                                ? "rgba(79,70,229,0.3)"
+                                            background: isCurrentTurn
+                                                ? "rgba(79,70,229,0.6)"
                                                 : "rgba(255,255,255,0.1)",
                                             borderRadius: 10,
                                             padding: "0.6rem 1rem",
                                             display: "flex",
                                             justifyContent: "space-between",
                                             alignItems: "center",
-                                            boxShadow: "0 0 6px rgba(0,0,0,0.3)",
+                                            boxShadow: isCurrentTurn
+                                                ? "0 0 12px #6366f1"
+                                                : "0 0 6px rgba(0,0,0,0.3)",
                                             minWidth: "220px",
-                                            transition: "background 0.3s",
+                                            transition: "background 0.3s, box-shadow 0.3s",
                                         }}
                                     >
                                         <div>
@@ -280,7 +285,7 @@ export default function GameCenter({
                         <>
                             <div>{renderPlayerList(leftPlayers)}</div>
 
-                            {/* === TABLE === */}
+                            {/* === SVARTABELL === */}
                             <div
                                 style={{
                                     background: "rgba(255,255,255,0.1)",
@@ -316,8 +321,14 @@ export default function GameCenter({
                                                     opacity: 1,
                                                     backgroundColor: revealedNow
                                                         ? ans.tension
-                                                            ? ["rgba(255,80,80,0.3)", "rgba(255,80,80,0.1)"]
-                                                            : ["rgba(0,255,0,0.3)", "rgba(0,255,0,0.05)"]
+                                                            ? [
+                                                                "rgba(255,80,80,0.3)",
+                                                                "rgba(255,80,80,0.1)",
+                                                            ]
+                                                            : [
+                                                                "rgba(0,255,0,0.3)",
+                                                                "rgba(0,255,0,0.05)",
+                                                            ]
                                                         : "transparent",
                                                 }}
                                                 transition={{ duration: revealedNow ? 1.2 : 0.5 }}
@@ -390,7 +401,9 @@ export default function GameCenter({
                             marginTop: "1rem",
                         }}
                     >
-                        {currentQuestionIndex + 1 < questions.length ? "Neste Spørsmål" : "Fullfør Spill"}
+                        {currentQuestionIndex + 1 < questions.length
+                            ? "Neste Spørsmål"
+                            : "Fullfør Spill"}
                     </button>
                 )}
             </footer>
