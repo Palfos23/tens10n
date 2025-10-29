@@ -567,7 +567,7 @@ const AnswerInput: React.FC<{ onSubmit: (answer: string) => void; category: stri
                     }}
                 >
                     {(filteredOptions.length > 0 ? filteredOptions : ["— No matches —"]).map(
-                        (opt, i) => (
+                        (opt) => (
                             <li
                                 key={opt}
                                 onClick={() => handleSelect(opt)}
