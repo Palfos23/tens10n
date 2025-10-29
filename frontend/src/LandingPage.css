@@ -121,7 +121,8 @@ select {
     padding: 0.6rem;
     border-radius: 10px;
     border: none;
-    background-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
     color: white;
     font-size: 1rem;
     outline: none;
@@ -132,6 +133,18 @@ select {
 select:hover {
     background-color: rgba(255, 255, 255, 0.2);
     box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+/* Fix for dropdowns in dark theme */
+select option {
+    background-color: #1f1f1f; /* mørk bakgrunn */
+    color: white; /* hvit tekst */
+}
+
+/* For Safari / macOS spesielt */
+select:focus option {
+    background-color: #1f1f1f;
+    color: white;
 }
 
 /* Start button */
