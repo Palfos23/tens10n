@@ -490,8 +490,10 @@ export default function GameCenter({ questions, players, onGameOver }: GameCente
                     onSubmit={handleAnswerSubmit}
                     answeredPlayers={answers.map((a) => a.player)}
                     allPlayers={rotatedPlayers}
+                    usedAnswers={answers.map((a) => a.answer)} // 👈 denne MÅ med
                 />
             )}
+
         </div>
     );
 }

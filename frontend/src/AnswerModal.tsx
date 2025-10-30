@@ -10,6 +10,7 @@ interface AnswerModalProps {
     onSubmit: (answer: string) => void;
     answeredPlayers: string[];
     allPlayers: string[];
+    usedAnswers: string[]; // 👈 nytt
 }
 
 const AnswerModal: React.FC<AnswerModalProps> = ({
@@ -20,14 +21,17 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
                                                      onSubmit,
                                                      answeredPlayers,
                                                      allPlayers,
+                                                     usedAnswers, // 👈 nytt
                                                  }) => {
     const [value, setValue] = useState("");
     const [allOptions, setAllOptions] = useState<string[]>([]);
     const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [validSelection, setValidSelection] = useState(false);
+    const [duplicateError, setDuplicateError] = useState(false); // 👈 nytt
     const cacheRef = React.useRef<Map<string, string[]>>(new Map());
 
+    // === Hent mulige svar (cache) ===
     useEffect(() => {
         async function loadOptions() {
             if (!category) return;
@@ -47,10 +51,13 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
         loadOptions();
     }, [category]);
 
+    // === Filtrer forslag under skriving ===
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
         setValue(newValue);
         setValidSelection(false);
+        setDuplicateError(false);
+
         if (newValue.length >= 2) {
             const filtered = allOptions
                 .filter((opt) => opt.toLowerCase().includes(newValue.toLowerCase()))
@@ -63,18 +70,32 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
         }
     };
 
+    // === Når man velger et forslag ===
     const handleSelect = (selected: string) => {
         setValue(selected);
         setShowDropdown(false);
         setValidSelection(true);
+        setDuplicateError(false);
     };
 
+    // === Innsending av svar ===
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        const duplicate = (usedAnswers ?? []).some(
+            (a) => a.toLowerCase() === value.toLowerCase().trim()
+        );
+
+        if (duplicate) {
+            setDuplicateError(true);
+            return;
+        }
+
         if (validSelection) {
-            onSubmit(value);
+            onSubmit(value.trim());
             setValue("");
             setValidSelection(false);
+            setDuplicateError(false);
         } else {
             alert("Velg et gyldig svar fra listen først.");
         }
@@ -148,6 +169,7 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
                     (Antall tension svar: {tensionAnswers})
                 </p>
 
+                {/* === Svarskjema === */}
                 <form onSubmit={handleSubmit} style={{ position: "relative" }}>
                     <input
                         type="text"
@@ -169,6 +191,21 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
                         }}
                     />
 
+                    {/* === Feilmelding om duplikat === */}
+                    {duplicateError && (
+                        <p
+                            style={{
+                                color: "#ff6961",
+                                marginTop: "0.4rem",
+                                fontSize: "0.95rem",
+                                fontWeight: 500,
+                            }}
+                        >
+                            Dette svaret er allerede brukt av en annen spiller!
+                        </p>
+                    )}
+
+                    {/* === Dropdown med forslag === */}
                     {showDropdown && (
                         <ul
                             style={{
@@ -187,22 +224,25 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
                                 zIndex: 9999,
                             }}
                         >
-                            {(filteredOptions.length > 0 ? filteredOptions : ["— Ingen treff —"]).map((opt) => (
-                                <li
-                                    key={opt}
-                                    onClick={() => handleSelect(opt)}
-                                    style={{
-                                        padding: "0.7rem 1rem",
-                                        cursor: "pointer",
-                                        textAlign: "center",
-                                        color: "white",
-                                        opacity: opt === "— Ingen treff —" ? 0.7 : 1,
-                                        fontStyle: opt === "— Ingen treff —" ? "italic" : "normal",
-                                    }}
-                                >
-                                    {opt}
-                                </li>
-                            ))}
+                            {(filteredOptions.length > 0 ? filteredOptions : ["— Ingen treff —"]).map(
+                                (opt) => (
+                                    <li
+                                        key={opt}
+                                        onClick={() => opt !== "— Ingen treff —" && handleSelect(opt)}
+                                        style={{
+                                            padding: "0.7rem 1rem",
+                                            cursor:
+                                                opt === "— Ingen treff —" ? "default" : "pointer",
+                                            textAlign: "center",
+                                            color: "white",
+                                            opacity: opt === "— Ingen treff —" ? 0.7 : 1,
+                                            fontStyle: opt === "— Ingen treff —" ? "italic" : "normal",
+                                        }}
+                                    >
+                                        {opt}
+                                    </li>
+                                )
+                            )}
                         </ul>
                     )}
 
@@ -221,14 +261,16 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
                             fontSize: "1.1rem",
                             cursor: validSelection ? "pointer" : "not-allowed",
                             transition: "0.3s",
-                            boxShadow: validSelection ? "0 0 15px rgba(139,92,246,0.5)" : "none",
+                            boxShadow: validSelection
+                                ? "0 0 15px rgba(139,92,246,0.5)"
+                                : "none",
                         }}
                     >
                         🚀 Send inn
                     </button>
                 </form>
 
-                {/* Svarindikatorer */}
+                {/* === Svarindikatorer === */}
                 <div
                     style={{
                         display: "flex",
@@ -247,7 +289,9 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
                                     width: 16,
                                     height: 16,
                                     borderRadius: "50%",
-                                    background: hasAnswered ? "#4f46e5" : "rgba(255,255,255,0.25)",
+                                    background: hasAnswered
+                                        ? "#4f46e5"
+                                        : "rgba(255,255,255,0.25)",
                                     boxShadow: hasAnswered ? "0 0 8px #6366f1" : "none",
                                 }}
                             />
