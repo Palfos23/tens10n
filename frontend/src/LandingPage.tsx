@@ -19,11 +19,12 @@ const categories = [
     "Underholdning",
     "Vitenskap",
     "Teknologi",
-    "Kultur"
+    "Kultur",
 ];
 
 const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
     const [open, setOpen] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
     const [numPlayers, setNumPlayers] = useState("2");
     const [numQuestions, setNumQuestions] = useState("5");
     const [category, setCategory] = useState(categories[0]);
@@ -57,6 +58,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                 />
             ))}
 
+            {/* ℹ️ Info-knapp */}
+            <button className="info-btn" onClick={() => setShowInfo(true)} aria-label="Spilleregler">
+                <text
+                    x="22"
+                    y="28"
+                    textAnchor="middle"
+                    fontSize="26"
+                    fill="currentColor"
+                    fontWeight="900"
+                >
+                    i
+                </text>
+            </button>
+
             <h1 className="title">
                 tens<span className="highlight">10</span>n
             </h1>
@@ -65,6 +80,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                 Opprett Spill
             </button>
 
+            {/* Modal for å opprette spill */}
             {open && (
                 <div className="modal-overlay" onClick={() => setOpen(false)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -117,6 +133,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
 
                         <button className="start-btn" onClick={handleStart}>
                             🚀 Opprett Spill
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Info-modal */}
+            {showInfo && (
+                <div className="modal-overlay" onClick={() => setShowInfo(false)}>
+                    <div className="modal info-modal" onClick={(e) => e.stopPropagation()}>
+                        <h2>📘 Regler for Tension</h2>
+                        <p>
+                            Tension er et quizspill der du må tenke raskt og bredt! 🎯
+                            <br />
+                            <br />
+                            💡 Hver runde får dere et spørsmål, hvor dere skal prøve å komme så
+                            nærme nummer 10 på listen som mulig.
+                            <br />
+                            <br />
+                            💡 Hvert spørsmål har x antall "tension-svar". Dette er altså svar etter
+                            nummer 10 på listen.
+                            <br />
+                            <br />
+                            ✅ Riktige svar gir poeng – jo nærmere nummer 10 på listen, jo bedre!
+                            <br />
+                            ⚠️ “Tension-svar” gir minus 5 poeng – pass på hva du svarer!
+                            <br />
+                            ❌ “Feil svar” gir minus 3 poeng
+                            <br />
+                            <br />
+                            🏁 Den med høyest poengsum etter siste spørsmål vinner!
+                        </p>
+
+                        <button className="close-info-btn" onClick={() => setShowInfo(false)}>
+                            Lukk
                         </button>
                     </div>
                 </div>
