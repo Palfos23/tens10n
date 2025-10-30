@@ -422,22 +422,63 @@ export default function GameCenter({ questions, players, onGameOver }: GameCente
                         zIndex: 999,
                         backdropFilter: "blur(4px)",
                         background: "rgba(0,0,0,0.9)",
+                        textAlign: "center", // 👈 midtstiller all tekst
+                        padding: "0 2rem",
                     }}
                 >
-                    <h1 style={{ fontSize: "2.6rem", textShadow: "0 0 20px #6366f1" }}>
+                    {/* 🔹 Ny linje øverst */}
+                    <h2
+                        style={{
+                            fontSize: "1.3rem",
+                            opacity: 0.85,
+                            marginBottom: "0.6rem",
+                            color: "#a5b4fc",
+                            letterSpacing: "0.5px",
+                            textTransform: "uppercase",
+                        }}
+                    >
+                        Spørsmål {currentQuestionIndex + 1} / {questions.length}
+                    </h2>
+
+                    {/* 🔹 Selve spørsmålet, midtstilt og tydelig */}
+                    <h1
+                        style={{
+                            fontSize: "2.6rem",
+                            maxWidth: "80%",
+                            lineHeight: 1.3,
+                            textAlign: "center",
+                            textShadow: "0 0 20px #6366f1",
+                            margin: "0 auto",
+                        }}
+                    >
                         {question.title}
                     </h1>
-                    <p style={{ fontSize: "1.2rem", opacity: 0.9, marginTop: "1rem" }}>
+
+                    <p
+                        style={{
+                            fontSize: "1.2rem",
+                            opacity: 0.9,
+                            marginTop: "1.5rem",
+                        }}
+                    >
                         Først ut:{" "}
                         <strong>
-                            {players.find((p) => p.name === rotatedPlayers[0])?.name}{" "}
+                            {players.find((p) => p.name === rotatedPlayers[0])?.name}
                         </strong>
                     </p>
-                    <p style={{ marginTop: "2rem", fontSize: "1.2rem", color: "#a5b4fc" }}>
+
+                    <p
+                        style={{
+                            marginTop: "2rem",
+                            fontSize: "1.2rem",
+                            color: "#a5b4fc",
+                        }}
+                    >
                         Runden starter om {introCountdown} sek…
                     </p>
                 </motion.div>
             )}
+
 
             {/* === MODAL === */}
             {!revealed && !allAnswered && !showIntro && (
