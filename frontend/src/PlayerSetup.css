@@ -1,3 +1,4 @@
+/* === Layout === */
 .player-setup-container {
     height: 100vh;
     width: 100vw;
@@ -10,7 +11,7 @@
     font-family: "Arial", sans-serif;
 }
 
-/* Kort med glassmorphism */
+/* === Kort med glassmorphism === */
 .player-setup-card {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
@@ -38,28 +39,16 @@
     }
 }
 
-/* Tittel */
+/* === Tittel === */
 .player-setup-title {
     margin-bottom: 1.8rem;
     font-size: 1.8rem;
     font-weight: 700;
     text-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
     letter-spacing: 1px;
-    animation: fadeIn 0.8s ease both;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Input-container */
+/* === Input-container === */
 .player-inputs {
     display: flex;
     flex-direction: column;
@@ -68,7 +57,7 @@
     align-items: center;
 }
 
-/* Input-felt */
+/* === Input-felt === */
 .player-input {
     width: 80%;
     padding: 0.7rem 1rem;
@@ -80,16 +69,6 @@
     text-align: center;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: flyIn 0.5s ease forwards;
-}
-
-@keyframes flyIn {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .player-input::placeholder {
@@ -101,7 +80,7 @@
     box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
 }
 
-/* Start-knapp */
+/* === Start-knapp === */
 .start-btn {
     margin-top: 2rem;
     padding: 0.9rem 2rem;
@@ -114,17 +93,6 @@
     box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
     background: linear-gradient(90deg, #4f46e5, #00ffff);
     color: #111;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: buttonFadeIn 0.6s ease forwards;
-    animation-delay: 0.5s;
-}
-
-@keyframes buttonFadeIn {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .start-btn.active:hover {
@@ -140,65 +108,131 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
-/* Feilmelding */
+/* === Feilmelding === */
 .error-text {
     margin-top: 0.8rem;
     color: #ff5555;
     font-weight: 500;
     font-size: 0.95rem;
     text-shadow: 0 0 8px rgba(255, 85, 85, 0.6);
-    animation: fadeInError 0.3s ease forwards;
     text-align: center;
 }
 
-@keyframes fadeInError {
-    from {
-        opacity: 0;
-        transform: translateY(-5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
+/* === Spiller-rad === */
 .player-row {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 0.8rem;
 }
 
-/* === Ny fargevelger === */
-.color-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.color-display {
+/* === Knapp for å åpne fargevelger === */
+.color-button {
     width: 2.4rem;
     height: 2.4rem;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: 1rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.color-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+/* === Modal overlay === */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    backdrop-filter: blur(5px);
+}
+
+/* === Fargevelger-popup === */
+.color-modal {
+    background: rgba(30, 30, 50, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    width: 320px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+    animation: fadeIn 0.3s ease;
+}
+
+.color-modal h3 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* === Grid med farger === */
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.6rem;
+    justify-items: center;
+    margin-top: 1rem;
+}
+
+/* === Fargeprikkene === */
+.color-dot {
+    width: 1rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+}
+
+.color-dot:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.color-dot.selected {
+    border: 2px solid white;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+}
+
+/* === Lukk-knapp i fargevelger === */
+.close-color-btn {
+    margin-top: 1.4rem;
+    background: linear-gradient(90deg, #4f46e5, #00ffff);
+    color: #111;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.5rem;
+    font-weight: bold;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
-.color-display:hover {
-    transform: scale(1.15);
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+.close-color-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.7);
 }
 
-/* Skjuler native color-input men gjør den klikkbar */
-.color-picker {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
+/* === Animations === */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

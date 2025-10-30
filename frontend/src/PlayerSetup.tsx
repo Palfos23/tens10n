@@ -7,26 +7,28 @@ interface PlayerSetupProps {
     onStart: (players: { name: string; color: string }[]) => void;
 }
 
-const colors = [
-    "#4f46e5",
-    "#16a34a",
-    "#dc2626",
-    "#f59e0b",
-    "#0ea5e9",
-    "#9333ea",
-    "#f43f5e",
-    "#22d3ee",
-    "#84cc16",
+const colorOptions = [
+    { hex: "#4f46e5", name: "Indigo" },
+    { hex: "#7C7CFC", name: "Lys Indigo" },
+    { hex: "#F22C05", name: "Rød" },
+    { hex: "#F2BB05", name: "Gul" },
+    { hex: "#032E8A", name: "Blå" },
+    { hex: "#05D6F2", name: "Lyseblå" },
+    { hex: "#f43f5e", name: "Rosa" },
+    { hex: "#5D038A", name: "Mørkelilla" },
+    { hex: "#FC9E7C", name: "Rosa" },
+    { hex: "#99000D", name: "Magenta" },
 ];
 
 export default function PlayerSetup({ numPlayers, onStart }: PlayerSetupProps) {
-    const [players, setPlayers] = useState(
-        Array.from({ length: numPlayers }, () => ({
-            name: "",
-            color: colors[Math.floor(Math.random() * colors.length)],
-        }))
-    );
+    const initialPlayers = Array.from({ length: numPlayers }, (_, i) => ({
+        name: "",
+        color: colorOptions[i % colorOptions.length].hex,
+    }));
+
+    const [players, setPlayers] = useState(initialPlayers);
     const [error, setError] = useState<string | null>(null);
+    const [colorPickerIndex, setColorPickerIndex] = useState<number | null>(null); // hvem som har åpnet fargevelger
 
     const allNamed = players.every((p) => p.name.trim().length > 0);
 
@@ -50,12 +52,14 @@ export default function PlayerSetup({ numPlayers, onStart }: PlayerSetupProps) {
         onStart(players);
     };
 
+    const usedColors = players.map((p) => p.color);
+
     return (
         <div className="player-setup-container">
             <StarBackground />
 
             <div className="player-setup-card">
-                <h2 className="player-setup-title">Tilpass spillerne dine 🎨</h2>
+                <h2 className="player-setup-title">Tilpass spillerne dine</h2>
 
                 <div className="player-inputs">
                     {players.map((p, i) => (
@@ -68,20 +72,13 @@ export default function PlayerSetup({ numPlayers, onStart }: PlayerSetupProps) {
                                 className="player-input"
                             />
 
-                            <div className="color-wrapper">
-                                <label
-                                    htmlFor={`color-${i}`}
-                                    className="color-display"
-                                    style={{ backgroundColor: p.color }}
-                                ></label>
-                                <input
-                                    id={`color-${i}`}
-                                    type="color"
-                                    value={p.color}
-                                    onChange={(e) => handleChange(i, "color", e.target.value)}
-                                    className="color-picker"
-                                />
-                            </div>
+                            <button
+                                className="color-button"
+                                style={{ backgroundColor: p.color }}
+                                onClick={() => setColorPickerIndex(i)}
+                                title="Velg farge"
+                            >
+                            </button>
                         </div>
                     ))}
                 </div>
@@ -96,6 +93,59 @@ export default function PlayerSetup({ numPlayers, onStart }: PlayerSetupProps) {
                     🚀 Start Spill
                 </button>
             </div>
+
+            {/* === Fargevelger-popup === */}
+            {colorPickerIndex !== null && (
+                <div className="modal-overlay" onClick={() => setColorPickerIndex(null)}>
+                    <div
+                        className="color-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3>Velg farge</h3>
+                        <div className="color-grid">
+                            {colorOptions.map((c) => {
+                                const takenByOther =
+                                    usedColors.includes(c.hex) &&
+                                    players[colorPickerIndex].color !== c.hex;
+                                return (
+                                    <button
+                                        key={c.hex}
+                                        className={`color-dot ${
+                                            players[colorPickerIndex].color === c.hex
+                                                ? "selected"
+                                                : ""
+                                        }`}
+                                        style={{
+                                            backgroundColor: takenByOther
+                                                ? "rgba(255,255,255,0.1)"
+                                                : c.hex,
+                                            cursor: takenByOther ? "not-allowed" : "pointer",
+                                            opacity: takenByOther ? 0.4 : 1,
+                                        }}
+                                        onClick={() => {
+                                            if (!takenByOther) {
+                                                handleChange(colorPickerIndex, "color", c.hex);
+                                                setColorPickerIndex(null);
+                                            }
+                                        }}
+                                        title={
+                                            takenByOther
+                                                ? `${c.name} (opptatt)`
+                                                : c.name
+                                        }
+                                    />
+                                );
+                            })}
+                        </div>
+                        <button
+                            className="close-color-btn"
+                            onClick={() => setColorPickerIndex(null)}
+                        >
+                            Lukk
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -6,7 +6,6 @@ const loadingTexts = [
     "Klargjør spørsmålene 🔍",
     "Henter kunnskap 💡",
     "Starter spillet 🚀",
-    "Lykke til☺️"
 ];
 
 const LoadingScreen: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
