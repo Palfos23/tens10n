@@ -51,7 +51,7 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
         const newValue = e.target.value;
         setValue(newValue);
         setValidSelection(false);
-        if (newValue.length >= 3) {
+        if (newValue.length >= 2) {
             const filtered = allOptions
                 .filter((opt) => opt.toLowerCase().includes(newValue.toLowerCase()))
                 .slice(0, 12);
