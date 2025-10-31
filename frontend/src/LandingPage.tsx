@@ -58,7 +58,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                 />
             ))}
 
-            {/* ℹ️ Info-knapp */}
+            {/* Info-knapp */}
             <button className="info-btn" onClick={() => setShowInfo(true)} aria-label="Spilleregler">
                 <text
                     x="22"
@@ -87,7 +87,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                         <h2>Opprett Spill</h2>
 
                         <div className="form-group">
-                            <label>👥 Antall Spillere</label>
+                            <label>Antall Spillere</label>
                             <select
                                 value={numPlayers}
                                 onChange={(e) => setNumPlayers(e.target.value)}
@@ -101,7 +101,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                         </div>
 
                         <div className="form-group">
-                            <label>❓ Antall Spørsmål</label>
+                            <label>Antall Spørsmål</label>
                             <select
                                 value={numQuestions}
                                 onChange={(e) => setNumQuestions(e.target.value)}
@@ -115,7 +115,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                         </div>
 
                         <div className="form-group">
-                            <label>🏷️ Kategori</label>
+                            <label>Kategori</label>
                             <select
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
@@ -128,7 +128,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
                                     </option>
                                 ))}
                             </select>
-                            <p className="coming-soon">💡 Kategorivalg kommer snart!</p>
+                            <p className="coming-soon">Kategorivalg kommer snart!</p>
                         </div>
 
                         <button className="start-btn" onClick={handleStart}>
@@ -142,27 +142,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartGame }) => {
             {showInfo && (
                 <div className="modal-overlay" onClick={() => setShowInfo(false)}>
                     <div className="modal info-modal" onClick={(e) => e.stopPropagation()}>
-                        <h2>📘 Regler for Tension</h2>
+                        <h2>Regler for Tension</h2>
                         <p>
-                            Tension er et quizspill der du må tenke raskt og bredt! 🎯
+                            Tension er et quizspill der du må tenke raskt og bredt!
                             <br />
                             <br />
-                            💡 Hver runde får dere et spørsmål, hvor dere skal prøve å komme så
+                            Hver runde får dere et spørsmål, hvor dere skal prøve å komme så
                             nærme nummer 10 på listen som mulig.
                             <br />
                             <br />
-                            💡 Hvert spørsmål har x antall "tension-svar". Dette er altså svar etter
+                            Hvert spørsmål har x antall "tension-svar". Dette er altså svar etter
                             nummer 10 på listen.
                             <br />
                             <br />
-                            ✅ Riktige svar gir poeng – jo nærmere nummer 10 på listen, jo bedre!
+                            Riktige svar gir poeng – jo nærmere nummer 10 på listen, jo bedre!
                             <br />
-                            ⚠️ “Tension-svar” gir minus 5 poeng – pass på hva du svarer!
+                            “Tension-svar” gir minus 5 poeng – pass på hva du svarer!
                             <br />
-                            ❌ “Feil svar” gir minus 3 poeng
+                            “Feil svar” gir minus 3 poeng
                             <br />
                             <br />
-                            🏁 Den med høyest poengsum etter siste spørsmål vinner!
+                            Den med høyest poengsum etter siste spørsmål vinner!
                         </p>
 
                         <button className="close-info-btn" onClick={() => setShowInfo(false)}>

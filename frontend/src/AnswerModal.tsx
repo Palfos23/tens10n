@@ -10,7 +10,7 @@ interface AnswerModalProps {
     onSubmit: (answer: string) => void;
     answeredPlayers: string[];
     allPlayers: string[];
-    usedAnswers: string[]; // 👈 nytt
+    usedAnswers: string[];
 }
 
 const AnswerModal: React.FC<AnswerModalProps> = ({
@@ -21,14 +21,14 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
                                                      onSubmit,
                                                      answeredPlayers,
                                                      allPlayers,
-                                                     usedAnswers, // 👈 nytt
+                                                     usedAnswers,
                                                  }) => {
     const [value, setValue] = useState("");
     const [allOptions, setAllOptions] = useState<string[]>([]);
     const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [validSelection, setValidSelection] = useState(false);
-    const [duplicateError, setDuplicateError] = useState(false); // 👈 nytt
+    const [duplicateError, setDuplicateError] = useState(false);
     const cacheRef = React.useRef<Map<string, string[]>>(new Map());
 
     // === Hent mulige svar (cache) ===
@@ -266,7 +266,7 @@ const AnswerModal: React.FC<AnswerModalProps> = ({
                                 : "none",
                         }}
                     >
-                        🚀 Send inn
+                        Send inn
                     </button>
                 </form>
 

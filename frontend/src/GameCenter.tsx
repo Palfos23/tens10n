@@ -228,18 +228,20 @@ export default function GameCenter({ questions, players, onGameOver }: GameCente
                                     <div
                                         key={player}
                                         style={{
-                                            background: playerObj.color,
+                                            border: `1px solid ${playerObj.color}`,
+                                            background: "rgba(255,255,255,0.08)",
                                             borderRadius: 12,
                                             padding: "0.6rem 1rem",
                                             display: "flex",
                                             justifyContent: "space-between",
                                             alignItems: "center",
-                                            boxShadow: `0 0 12px rgba(256,256,256,0.5)`,
+                                            boxShadow: `0 0 12px ${playerObj.color}66`,
                                             minWidth: "240px",
-                                            transition: "background 0.3s, box-shadow 0.3s",
+                                            transition: "all 0.3s ease",
                                         }}
                                     >
-                                        <div
+
+                                    <div
                                             style={{
                                                 display: "flex",
                                                 flexDirection: "column",
@@ -422,11 +424,11 @@ export default function GameCenter({ questions, players, onGameOver }: GameCente
                         zIndex: 999,
                         backdropFilter: "blur(4px)",
                         background: "rgba(0,0,0,0.9)",
-                        textAlign: "center", // 👈 midtstiller all tekst
+                        textAlign: "center",
                         padding: "0 2rem",
                     }}
                 >
-                    {/* 🔹 Ny linje øverst */}
+                    {/* Ny linje øverst */}
                     <h2
                         style={{
                             fontSize: "1.3rem",
@@ -440,7 +442,7 @@ export default function GameCenter({ questions, players, onGameOver }: GameCente
                         Spørsmål {currentQuestionIndex + 1} / {questions.length}
                     </h2>
 
-                    {/* 🔹 Selve spørsmålet, midtstilt og tydelig */}
+                    {/* Selve spørsmålet, midtstilt og tydelig */}
                     <h1
                         style={{
                             fontSize: "2.6rem",
@@ -490,7 +492,7 @@ export default function GameCenter({ questions, players, onGameOver }: GameCente
                     onSubmit={handleAnswerSubmit}
                     answeredPlayers={answers.map((a) => a.player)}
                     allPlayers={rotatedPlayers}
-                    usedAnswers={answers.map((a) => a.answer)} // 👈 denne MÅ med
+                    usedAnswers={answers.map((a) => a.answer)}
                 />
             )}
 

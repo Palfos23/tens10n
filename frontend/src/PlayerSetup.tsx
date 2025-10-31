@@ -28,7 +28,7 @@ export default function PlayerSetup({ numPlayers, onStart }: PlayerSetupProps) {
 
     const [players, setPlayers] = useState(initialPlayers);
     const [error, setError] = useState<string | null>(null);
-    const [colorPickerIndex, setColorPickerIndex] = useState<number | null>(null); // hvem som har åpnet fargevelger
+    const [colorPickerIndex, setColorPickerIndex] = useState<number | null>(null);
 
     const allNamed = players.every((p) => p.name.trim().length > 0);
 
@@ -38,7 +38,7 @@ export default function PlayerSetup({ numPlayers, onStart }: PlayerSetupProps) {
         .some((name, i, arr) => arr.indexOf(name) !== i);
 
     useEffect(() => {
-        setError(hasDuplicates ? "Flere spillere har samme navn 🧩" : null);
+        setError(hasDuplicates ? "Flere spillere har samme navn" : null);
     }, [hasDuplicates]);
 
     const handleChange = (i: number, key: "name" | "color", value: string) => {
@@ -90,7 +90,7 @@ export default function PlayerSetup({ numPlayers, onStart }: PlayerSetupProps) {
                     disabled={!allNamed || hasDuplicates}
                     onClick={handleStart}
                 >
-                    🚀 Start Spill
+                    Start Spill
                 </button>
             </div>
 

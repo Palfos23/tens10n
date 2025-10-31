@@ -3,9 +3,8 @@ import StarBackground from "./StarBackground";
 import "./LoadingScreen.css";
 
 const loadingTexts = [
-    "Klargjør spørsmålene 🔍",
-    "Henter kunnskap 💡",
-    "Starter spillet 🚀",
+    "Klargjør spørsmålene",
+    "Starter spillet",
 ];
 
 const LoadingScreen: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {

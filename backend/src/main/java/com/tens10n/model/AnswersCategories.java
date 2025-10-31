@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 public class AnswersCategories {
-    // A map like { "cities": [ ... ], "countries": [ ... ] }
     private Map<String, List<String>> categories;
 
     public Map<String, List<String>> getCategories() {
