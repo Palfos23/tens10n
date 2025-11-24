@@ -52,7 +52,7 @@ public class QuestionService {
     // --- CATEGORIES ---
 
     public List<String> getAnswersByCategory(String category) {
-        return categoryRepository.findById(category.toLowerCase())
+        return categoryRepository.findById(category)
                 .map(AnswerCategory::getAnswers)
                 .orElse(Collections.emptyList());
     }
