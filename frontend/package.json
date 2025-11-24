@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://palfos23.github.io/tens10n/",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
